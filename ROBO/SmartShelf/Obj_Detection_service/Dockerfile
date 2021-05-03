@@ -29,6 +29,7 @@ RUN mkdir -p /usr/app/detection
 RUN mkdir -p /usr/app/resources
 RUN mkdir -p /usr/app/images
 RUN mkdir -p /usr/app/images/input
+RUN mkdir -p /usr/app/images/result
 
 # Set the home directory to our app user's home.
 ENV APP_HOME=/usr/app
