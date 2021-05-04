@@ -33,7 +33,7 @@
           size="small"
           @click="disaster()"
         >
-          {{ $t('Disaster') }}
+          {{ $t('Simulate Disaster') }}
         </el-button>
       </p>
       <div class="tableDiv">
@@ -154,12 +154,8 @@ export default {
     disaster () {
       robo.simulateDisaster().then(response => {
       }).catch((error) => {
+        console.log(error)
         this.$message.error(this.$t('failed to simulate disaster'))
-        if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
-          this.$message.error(this.$t('tip.failedToGetList'))
-        } else {
-          this.$message.error(this.$t('tip.failedToGetList'))
-        }
       })
     },
     getPvcsListInPage () {
@@ -171,7 +167,7 @@ export default {
         if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
           this.tableData = this.paginationData = []
         } else {
-          this.$message.error(this.$t('tip.failedToGetList'))
+          this.$message.error(this.$t('failed to get pvcs list'))
         }
       })
     }

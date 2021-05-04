@@ -54,115 +54,27 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="16">
+            <el-col :span="24">
               <el-tabs
                 v-model="activeName"
               >
-                <el-tab-pane>
+                <el-tab-pane name="All Inventory">
                   <span slot="label"><i class="el-icon-shopping-cart-full" /> All Inventory</span>
+                  <AllInventory
+                    :get-shelf-list="getShelfListInPage"
+                    :shelf-data="shelfData"
+                  />
                 </el-tab-pane>
-                <el-tab-pane>
+                <el-tab-pane name="Low Inventory">
                   <span slot="label"><i class="el-icon-shopping-cart-1" /> Low Inventory</span>
+                  <LowInventory
+                    :get-low-shelf-list="getLowShelfListInPage"
+                    :low-shelf-data="lowShelfData"
+                  />
                 </el-tab-pane>
               </el-tabs>
             </el-col>
           </el-row>
-          <div class="tableDiv">
-            <el-row class="table">
-              <el-table
-                :data="currPageTableData"
-                v-loading="dataLoading"
-                class="mt20"
-                border
-                size="small"
-                style="width: 100%;"
-              >
-                <el-table-column
-                  prop="shelfName"
-                  sortable
-                  :label="$t('Name')"
-                  width="110px"
-                  header-align="center"
-                  align="center"
-                >
-                  <template slot-scope="scope">
-                    <span style="margin-left: 10px">{{ scope.row.shelfName }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  prop="location"
-                  :label="$t('Location')"
-                  width="110px"
-                  header-align="center"
-                  align="center"
-                />
-                <el-table-column
-                  prop="camName"
-                  :label="$t('Camera')"
-                  width="110px"
-                  header-align="center"
-                  align="center"
-                />
-                <el-table-column
-                  :label="$t('Products')"
-                  header-align="center"
-                  align="center"
-                >
-                  <template slot-scope="scope">
-                    <span
-                      v-for="(item,index) in scope.row.productDetails"
-                      :key="index"
-                      style="display: inline-block"
-                    >
-                      {{ item.productType }}
-                      <div
-                        style="width: 80px; height: 20px; background-color: green; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
-                        v-if="item.status === 'Mostly Filled'"
-                      >
-                        <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
-                      </div>
-                      <div
-                        style="width: 80px; height: 20px; background-color: red; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
-                        v-else-if="item.status === 'Needs Filling'"
-                      >
-                        <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
-                      </div>
-                      <div
-                        style="width: 80px; height: 20px; background-color: orange; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
-                        v-else-if="item.status === 'Partially Filled'"
-                      >
-                        <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
-                      </div>
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column
-                  :label="$t('common.operation')"
-                  width="110px"
-                  header-align="center"
-                  align="center"
-                >
-                  <template slot-scope="scope">
-                    <el-button
-                      id="liveVideo"
-                      @click.native.prevent="handleLiveVideo(scope.row)"
-                      type="text"
-                      size="small"
-                    >
-                      {{ $t('Live video') }}
-                    </el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </el-row>
-            <div class="pageBar">
-              <pagination
-                :page-sizes="[10,15,20,25]"
-                :table-data="paginationData"
-                @getCurrentPageData="getCurrentPageData"
-              />
-            </div>
-          </div>
           <el-dialog
             :close-on-click-modal="false"
             :title="title"
@@ -290,22 +202,12 @@
               </div>
             </el-upload>
           </el-dialog>
-          <el-dialog
-            :close-on-click-modal="false"
-            :title="$t('Live video')"
-            :visible.sync="dialogVisibleLiveVideo"
-            width="50%"
-          >
-            <Camerapannel
-              :delcamera="deleteCamera"
-              :data="liveVideo"
-            />
-          </el-dialog>
         </div>
       </el-col>
       <el-col :span="8">
         <Notifications
           @onChange="getShelfListInPage"
+          @OnChangeLowList= "getLowShelfListInPage"
         />
       </el-col>
     </el-row>
@@ -314,36 +216,24 @@
 
 <script>
 import { robo } from '../tools/request.js'
-import pagination from '../components/Pagination.vue'
-import Camerapannel from './image.vue'
+import AllInventory from './AllInventory.vue'
+import LowInventory from './LowInventory.vue'
 import Notifications from '@/app/Notifications'
 export default {
   name: 'Sysk8s',
   components: {
     Notifications,
-    pagination,
-    Camerapannel
+    AllInventory,
+    LowInventory
   },
   data () {
     return {
-      formData: {
-        name: '',
-        location: '',
-        rtspurl: ''
-      },
-      liveVideo: {},
-      image: {},
-      cameraList: [],
-      flvPlayer: null,
+      shelfData: [],
+      lowShelfData: [],
       activeName: 'All Inventory',
-      paginationData: [],
-      currPageTableData: [],
       dataLoading: true,
-      tableData: [],
       dialogVisible: false,
       dialogVisibleUpload: false,
-      dialogVisibleLiveVideo: false,
-      dialogVisibleImage: false,
       fileList: [],
       currForm: {
         shelfName: '',
@@ -362,7 +252,7 @@ export default {
   },
   mounted () {
     this.getShelfListInPage()
-    this.getLiveVideo('FrontShelf')
+    this.getLowShelfListInPage()
   },
   computed: {
   },
@@ -385,18 +275,11 @@ export default {
         MaxCount: ''
       })
     },
-    handleLiveVideo (row) {
-      this.getLiveVideo(row.shelfName)
-      this.dialogVisibleLiveVideo = true
-    },
     filterTableData (val, key) {
       this.paginationData = this.paginationData.filter(item => {
         let itemVal = item[key]
         if (itemVal) return itemVal.toLowerCase().indexOf(val) > -1
       })
-    },
-    getCurrentPageData (data) {
-      this.currPageTableData = data
     },
     cancel (row) {
       this.dialogVisible = false
@@ -431,7 +314,7 @@ export default {
       let params = new FormData()
       params.append('file', content.file)
       robo.uploadVideo(params).then(response => {
-        this.showMessage('success', this.$t('tip.uploadSuc'), 1500)
+        this.showMessage('success', this.$t('Uploaded file successfully'), 1500)
         this.dialogVisibleUpload = false
       }).catch((error) => {
         console.log(error)
@@ -440,13 +323,41 @@ export default {
       })
     },
     getShelfListInPage () {
+      console.log('get shelf list')
       robo.getShelfList().then(response => {
-        this.tableData = this.paginationData = response.data.shelfDetails
+        this.shelfData = response.data.shelfDetails
+        console.log('get shelf list -> ', this.shelfData)
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false
         if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
-          this.tableData = this.paginationData = []
+          this.shelfData = []
+        } else {
+          this.$message.error(this.$t('failed to shelf list'))
+        }
+      })
+    },
+    getLowShelfListInPage: function () {
+      console.log('get Low shelf list')
+      robo.getShelfList().then(response => {
+        let shelfDetails = response.data.shelfDetails
+        this.lowShelfData = []
+        for (let i = 0; i < shelfDetails.length; i++) {
+          let lowShelfEntry = false
+          for (let j = 0; j < shelfDetails[i].productDetails.length; j++) {
+            if (shelfDetails[i].productDetails[j].status === 'Needs Filling') {
+              lowShelfEntry = true
+            }
+          }
+          if (lowShelfEntry) {
+            this.lowShelfData.push(shelfDetails[i])
+          }
+        }
+        this.dataLoading = false
+      }).catch((error) => {
+        this.dataLoading = false
+        if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
+          this.lowShelfData = []
         } else {
           this.$message.error(this.$t('failed to shelf list'))
         }
@@ -469,22 +380,6 @@ export default {
       } else {
         this.$message.error(error.data)
       }
-    },
-    getLiveVideo (shelfName) {
-      robo.getLiveVideo(shelfName).then(response => {
-        if (response.status === 200) {
-          let obj = {
-            name: 'shlef1.mp4',
-            type: 'video/mp4',
-            location: '',
-            src: 'http://0.0.0.0:9995/v1/shelf/video/FrontShelf',
-            rtspurl: 'shlef1.mp4'
-          }
-          this.liveVideo = obj
-        }
-      }).catch((error) => {
-        this.handleError(error)
-      })
     }
   }
 }

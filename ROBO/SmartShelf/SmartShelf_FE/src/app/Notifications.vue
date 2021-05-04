@@ -41,13 +41,24 @@
             prop="notificationType"
             width="100px"
           >
-            <!--                  <template slot-scope="scope">-->
-            <template>
+            <template slot-scope="scope">
               <el-tag
                 type="danger"
+                v-if="scope.row.notificationType === 'Needs Filling'"
               >
-                Needs filling
-                <!--                      {{ scope.row.notificationType }}-->
+                {{ scope.row.notificationType }}
+              </el-tag>
+              <el-tag
+                type="warning"
+                v-else-if="scope.row.notificationType === 'Product Mismatch'"
+              >
+                {{ scope.row.notificationType }}
+              </el-tag>
+              <el-tag
+                type="warning"
+                v-else
+              >
+                {{ scope.row.notificationType }}
               </el-tag>
             </template>
           </el-table-column>
@@ -69,7 +80,7 @@
                 type="text"
                 size="mini"
               >
-                {{ $t('details') }}
+                {{ $t('Image') }}
               </el-button>
             </template>
           </el-table-column>
@@ -131,6 +142,7 @@ export default {
     socket.on('notify', (data) => {
       this.getShelfNotificationListInPage()
       this.$emit('onChange')
+      this.$emit('OnChangeLowList')
     })
   },
   methods: {
@@ -157,7 +169,7 @@ export default {
         if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
           this.tableData = this.paginationData = []
         } else {
-          this.$message.error(this.$t('tip.failedToGetList'))
+          this.$message.error(this.$t('failed to get notifications list'))
         }
       })
     },

@@ -18,7 +18,7 @@
     <div class="video-cards">
       <div
         class="video-player vjs-custom-skin"
-        v-if="data.rtspurl.indexOf('mp4')>-1"
+        v-if="data.type.indexOf('mp4')>-1"
       >
         <video
           muted
@@ -32,7 +32,7 @@
       </div>
       <div
         class="video-player vjs-custom-skin"
-        v-if="data.rtspurl.indexOf('mp4')<0"
+        v-if="data.type.indexOf('mp4')<0"
       >
         <video
           muted

@@ -102,5 +102,6 @@ export {
   POST,
   PUT,
   DELETE,
-  robo
+  robo,
+  shelfApi
 }

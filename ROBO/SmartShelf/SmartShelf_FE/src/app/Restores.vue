@@ -68,7 +68,26 @@
               :label="$t('Status')"
               header-align="center"
               align="center"
-            />
+            >
+              <template slot-scope="scope">
+                <el-tag
+                  type="success"
+                  effect="light"
+                  size="mini"
+                  v-if="scope.row.status === 'Completed'"
+                >
+                  {{ scope.row.status }}
+                </el-tag>
+                <el-tag
+                  type="danger"
+                  effect="light"
+                  size="mini"
+                  v-else
+                >
+                  {{ scope.row.status }}
+                </el-tag>
+              </template>
+            </el-table-column>
           </el-table>
         </el-row>
         <div class="pageBar">
@@ -148,6 +167,7 @@ export default {
   },
   data () {
     return {
+      timer: null,
       paginationData: [],
       currPageTableData: [],
       dataLoading: true,
@@ -164,13 +184,17 @@ export default {
   mounted () {
     this.getRestoreListInPage()
   },
+  beforeDestroy () {
+    this.timer = null
+    clearTimeout(this.timer)
+  },
   computed: {
   },
   methods: {
     confirm (form) {
       robo.createRestore(this.currForm).then(response => {
-        this.showMessage('success', this.$t('tip.sucToRegNode'), 1500)
-        this.getBackupListInPage()
+        this.showMessage('success', this.$t('Restore success'), 1500)
+        this.timer = setTimeout(() => { this.getRestoreListInPage() }, 3000)
         this.dialogVisible = false
       }).catch((error) => {
         this.handleError(error)
@@ -180,8 +204,6 @@ export default {
       this.dialogVisible = false
       if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
         this.$message.error(error.data.details[0])
-      } else if (error.status === 403) {
-        this.$message.error(this.$t('tip.loginOperation'))
       } else {
         this.$message.error(error.data)
       }

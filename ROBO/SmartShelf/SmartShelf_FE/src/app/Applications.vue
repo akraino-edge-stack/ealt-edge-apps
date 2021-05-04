@@ -61,6 +61,15 @@
                   type="success"
                   effect="light"
                   size="mini"
+                  v-if="scope.row.status === 'Running'"
+                >
+                  {{ scope.row.status }}
+                </el-tag>
+                <el-tag
+                  type="danger"
+                  effect="light"
+                  size="mini"
+                  v-else
                 >
                   {{ scope.row.status }}
                 </el-tag>

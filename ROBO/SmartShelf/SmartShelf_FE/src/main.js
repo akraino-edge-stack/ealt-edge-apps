@@ -7,6 +7,14 @@ import locale from 'element-ui/lib/locale/lang/en'
 import 'element-ui/lib/theme-chalk/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
 import i18n from './locales/i18n.js'
+Vue.prototype.showMessage = function (type, msg, time) {
+  ElementUI.Message({
+    showClose: true,
+    type: type,
+    message: msg,
+    duration: time
+  })
+}
 
 Vue.use(ElementUI, { locale })
 Vue.config.productionTip = false
