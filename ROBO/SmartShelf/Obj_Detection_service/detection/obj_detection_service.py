@@ -234,12 +234,6 @@ def Detection(img):
         }
         listOfMsgs.append(objdict)
 
-    objdict = {
-        'objtype': 'car',
-        'objcount': 5
-    }
-    listOfMsgs.append(objdict)
-
     # cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
     print("before im write")
     cv2.imwrite(IMAGE_PATH + "result.jpeg", frame)
