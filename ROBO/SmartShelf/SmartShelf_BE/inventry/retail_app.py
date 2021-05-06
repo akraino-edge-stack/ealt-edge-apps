@@ -45,6 +45,7 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 ALLOWED_VIDEO_EXTENSIONS = {'mp4'}
 COUNT = 0
 listOfMsgs = []
+listOfAlertsMsgs = []
 listOfCameras = []
 listOfShelf = []
 listOfVideos = []
@@ -292,9 +293,11 @@ def video(video_capture, shelf_info, TableIndex):
     return 'SampleString'
 
 
-def parse_obj_data(data, shelf_info, TableIndex):
+def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
     notifyFlag = 0
+    bottleCnt = 0
+    carCnt = 0
 
     if ('Bottle' == shelf_info['productDetails'][0]['obj']):
         bottelMax = shelf_info['productDetails'][0]['MaxCount']
@@ -312,9 +315,12 @@ def parse_obj_data(data, shelf_info, TableIndex):
         objCount = obj['objcount']
         if (objType == 'bottle') :
             bottleCnt = objCount
-            if (objCount >= bottelMax*70/100):
+            if (objCount >= bottelMax):
+                bottleStatus = "Over Filled"
+                notifyFlag = 1
+            elif (objCount >= bottelMax*70/100):
                 bottleStatus = "Mostly Filled"
-            elif (objCount >= bottelMax*40/100):
+            elif (objCount > bottelMax*30/100):
                 bottleStatus = "Partially Filled"
             else:
                 bottleStatus = "Needs Filling"
@@ -322,9 +328,12 @@ def parse_obj_data(data, shelf_info, TableIndex):
 
         if (objType == 'car') :
             carCnt = objCount
+            if (objCount >= carMax):
+                Carstatus = "Over Filled"
+                notifyFlag = 2
             if (objCount >= carMax*70/100):
                 Carstatus = "Mostly Filled"
-            elif (objCount >= carMax*40/100):
+            elif (objCount >= carMax*30/100):
                 Carstatus = "Partially Filled"
             else:
                 Carstatus = "Needs Filling"
@@ -332,6 +341,13 @@ def parse_obj_data(data, shelf_info, TableIndex):
 
         if (objType == 'other') :
             notifyFlag = 3
+
+    if (bottleCnt == 0) :
+        bottleStatus = "Needs Filling"
+        notifyFlag = 1
+    if (carCnt == 0) :
+        Carstatus = "Needs Filling"
+        notifyFlag = 2
 
     shelfTable = {'shelfName': shelf_info['shelfName'],
                       'location': shelf_info['location'],
@@ -359,6 +375,53 @@ def parse_obj_data(data, shelf_info, TableIndex):
         listOfShelfTables[TableIndex] = shelfTable
     else :
         listOfShelfTables.insert(TableIndex, shelfTable)
+
+    time_sec = time.time()
+    local_time = time.ctime(time_sec)
+    url = FRONTEND_URL + "/notify"
+
+    if (bottleStatus == "Needs Filling") or (bottleStatus == "Over Filled") \
+            or (Carstatus == "Needs Filling") or (Carstatus == "Over Filled")\
+            or notifyFlag == 3:
+        if (bottleStatus == "Needs Filling") or (bottleStatus == "Over "
+                                                                 "Filled"):
+            msg = "Product Bottle " + bottleStatus + "in " + shelf_name
+            status = bottleStatus
+        if (Carstatus == "Needs Filling") or (Carstatus == "Over "
+                                                                 "Filled"):
+            msg = "Product ToyCar " + Carstatus + "in " + shelf_name
+            status = Carstatus
+        if (notifyFlag == 3):
+            status = "Product Mismatch"
+            msg = "Product are mismatched in " + shelf_name
+
+        newdict = {"msgid": COUNT, "time": local_time,
+                   "notificationType": status,
+                   "msg": msg, "shelf": shelf_name}
+
+        shelfNotify = 0
+        for i in range(len(listOfAlertsMsgs)) :
+            print ("shelf name in list: {0}, shelf name: {1}".format(
+                listOfAlertsMsgs[i]['shelf'], shelf_name))
+            if (listOfAlertsMsgs[i]['shelf'] == shelf_name) :
+                listOfAlertsMsgs[i] = newdict
+                requests.post(url, json=newdict)
+                shelfNotify = 1
+
+        if (shelfNotify == 0) :
+                listOfAlertsMsgs.insert(0, newdict)
+                requests.post(url, json=newdict)
+    else :
+        for i in range(len(listOfAlertsMsgs)) :
+            if (listOfAlertsMsgs[i].shelf == shelf_name) :
+                status = "Mostly Filled"
+                msg = "Product filled in " + shelf_name
+                newdict = {"msgid": COUNT, "time": local_time,
+                           "notificationType": status,
+                           "msg": msg, "shelf": shelf_name}
+                listOfAlertsMsgs.pop(i);
+                requests.post(url, json=newdict)
+
     return notifyFlag
 
 
@@ -378,18 +441,22 @@ def send_notification_msg(shelf_name, notifyFlag, COUNT):
     elif (notifyFlag == 2):
         notification_type = "Needs Filling"
         msg = "Product ToyCar needs filling in " + shelf_name
-    else:
+    elif (notifyFlag == 3):
         notification_type = "Product Mismatch"
         msg = "Product are mismatched in " + shelf_name
+    else:
+        notification_type = "Mostly filled"
+        msg = "Product are filled in " + shelf_name
 
     time_sec = time.time()
     local_time = time.ctime(time_sec)
 
     newdict = {"msgid": COUNT, "time": local_time,
                "notificationType": notification_type,
-               "msg": msg}
+               "msg": msg, "shelf": shelf_name}
     listOfMsgs.insert(0, newdict)
     requests.post(url, json=newdict)
+
 
 def shelf_inventory(frame, shelf_info, TableIndex):
     """
@@ -421,10 +488,9 @@ def shelf_inventory(frame, shelf_info, TableIndex):
     file.write(response.content)
     file.close()
 
-    notifyFlag = parse_obj_data(data, shelf_info, TableIndex)
+    notifyFlag = parse_obj_data(data, shelf_info, TableIndex, shelf_info['shelfName'])
 
-    if (notifyFlag != 0):
-        send_notification_msg(shelf_info['shelfName'], notifyFlag, COUNT)
+    send_notification_msg(shelf_info['shelfName'], notifyFlag, COUNT)
 
     # return ''
 
@@ -680,6 +746,21 @@ def monitor_messages():
     notification = {'Notifications': listOfMsgs,
         "shelfDetails": listOfShelfTables}
     return jsonify(notification)
+
+
+@app.route('/v1/shelf/AlertsMessages', methods=['GET'])
+def alerts_messages():
+    """
+        This method is used to return list of messages
+    """
+    app.logger.info("Received message from ClientIP [" + request.remote_addr
+                    + "] Operation [" + request.method + "]" +
+                    " Resource [" + request.url + "]")
+    # TODO: Add shelf table info when sendig notification
+    notification = {'Notifications': listOfAlertsMsgs,
+        "shelfDetails": listOfShelfTables}
+    return jsonify(notification)
+
 
 @app.route('/v1/monitor/cameras/<cameraID>', methods=['GET'])
 def get_camera(cameraID):
