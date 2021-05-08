@@ -16,6 +16,12 @@
 
 <template>
   <div>
+    <Search
+      :status-item="false"
+      :affinity-item="false"
+      :ip-item="false"
+      @getSearchData="getSearchData"
+    />
     <div class="tableDiv">
       <el-row class="table">
         <el-table
@@ -29,8 +35,8 @@
           <el-table-column
             prop="shelfName"
             sortable
-            :label="$t('Name')"
-            width="110px"
+            :label="$t('Shelf Name')"
+            width="130px"
             header-align="center"
             align="center"
           >
@@ -41,14 +47,7 @@
           <el-table-column
             prop="location"
             :label="$t('Location')"
-            width="110px"
-            header-align="center"
-            align="center"
-          />
-          <el-table-column
-            prop="camName"
-            :label="$t('Camera')"
-            width="110px"
+            width="120px"
             header-align="center"
             align="center"
           />
@@ -87,7 +86,7 @@
           </el-table-column>
           <el-table-column
             :label="$t('common.operation')"
-            width="110px"
+            width="120px"
             header-align="center"
             align="center"
           >
@@ -130,6 +129,7 @@
 import { shelfApi } from '../tools/request.js'
 import pagination from '../components/Pagination.vue'
 import Camerapannel from './image.vue'
+import Search from '../components/Search2.vue'
 export default {
   name: 'AllInventory',
   props: {
@@ -140,13 +140,14 @@ export default {
         },
     shelfData:
         {
-          type: Object,
+          type: Array,
           required: true
         }
   },
   components: {
     pagination,
-    Camerapannel
+    Camerapannel,
+    Search
   },
   data () {
     return {
@@ -164,7 +165,6 @@ export default {
   },
   mounted () {
     this.getShelfList()
-    this.getLiveVideo('FrontShelf')
   },
   watch: {
     shelfData (val) {
@@ -178,6 +178,23 @@ export default {
   computed: {
   },
   methods: {
+    getSearchData (data) {
+      this.paginationData = this.tableData
+      if (this.paginationData && this.paginationData.length > 0) {
+        let reset = false
+        for (let key in data) {
+          if (data[key]) {
+            reset = true
+            let dataKey = key
+            if (key === 'shelfName') {
+              dataKey = 'shelfName'
+            }
+            this.filterTableData(data[key].toLowerCase(), dataKey)
+          }
+        }
+        if (!reset) this.paginationData = this.tableData
+      }
+    },
     deleteCamera (cameraname) {
       console.log()
     },

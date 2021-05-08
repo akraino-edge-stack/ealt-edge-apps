@@ -23,6 +23,11 @@
         :ip-item="false"
         @getSearchData="getSearchData"
       />
+      <el-badge
+        value="Applications"
+        class="badge"
+        width="100%"
+      />
       <div class="tableDiv">
         <el-row class="table">
           <el-table
@@ -126,6 +131,7 @@ export default {
   computed: {
   },
   methods: {
+
     filterTableData (val, key) {
       this.paginationData = this.paginationData.filter(item => {
         let itemVal = item[key]
@@ -175,11 +181,7 @@ export default {
   height: 100%;
   background: #fff;
   padding: 10px 10px;
-  .table {
-    margin-top: 10px;
-  }
   .tableDiv {
-    margin-top: 10px;
     padding: 0px 30px;
   }
   .btn-add {
@@ -188,8 +190,8 @@ export default {
     float: left;
   }
 }
-
 .el-col{
   padding-left:0 !important;
 }
+
 </style>

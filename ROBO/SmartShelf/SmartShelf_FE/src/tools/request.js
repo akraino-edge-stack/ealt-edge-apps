@@ -89,6 +89,9 @@ let robo = {
   getShelfNotificationList () {
     return GET(shelfApi + '/messages')
   },
+  getShelfAlertNotificationList () {
+    return GET(shelfApi + '/AlertsMessages')
+  },
   getLiveVideo (shelfName) {
     return GET(shelfApi + '/video/' + shelfName)
   },

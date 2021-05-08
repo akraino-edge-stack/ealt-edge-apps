@@ -127,10 +127,18 @@
                 maxlength="20"
                 prop="backupName"
               >
-                <el-input
+                <el-select
                   id="backupName"
                   v-model="currForm.backupName"
-                />
+                  :placeholder="$t('Backup Name')"
+                >
+                  <el-option
+                    v-for="(item,index) in backupList"
+                    :key="index"
+                    :label="item.name"
+                    :value="item.name"
+                  />
+                </el-select>
               </el-form-item>
             </el-form>
           </el-row>
@@ -167,6 +175,7 @@ export default {
   },
   data () {
     return {
+      backupList: [],
       timer: null,
       paginationData: [],
       currPageTableData: [],
@@ -220,6 +229,7 @@ export default {
     },
     restore () {
       this.title = this.$t('Restore')
+      this.getRestoreListInPage()
       this.dialogVisible = true
       this.resetForm()
     },
@@ -252,6 +262,7 @@ export default {
     getRestoreListInPage () {
       robo.getBackupList().then(response => {
         this.tableData = this.paginationData = response.data.restoresData
+        this.backupList = response.data.backupsData
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false

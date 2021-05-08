@@ -109,16 +109,7 @@
                     />
                   </el-form-item>
                   <el-form-item
-                    :label="$t('Camera Name')"
-                    prop="camName"
-                  >
-                    <el-input
-                      id="camName"
-                      v-model="currForm.camName"
-                    />
-                  </el-form-item>
-                  <el-form-item
-                    :label="$t('rtspUrl')"
+                    :label="$t('Camera Url')"
                     prop="rtspUrl"
                   >
                     <el-input
@@ -207,7 +198,7 @@
       <el-col :span="8">
         <Notifications
           @onChange="getShelfListInPage"
-          @OnChangeLowList= "getLowShelfListInPage"
+          @OnChangeLowList="getLowShelfListInPage"
         />
       </el-col>
     </el-row>
@@ -238,7 +229,7 @@ export default {
       currForm: {
         shelfName: '',
         location: '',
-        camName: '',
+        camName: 'Camera01',
         rtspUrl: '',
         productDetails: [{
           obj: '',
@@ -289,7 +280,7 @@ export default {
       this.currForm = {
         shelfName: '',
         location: '',
-        camName: '',
+        camName: 'camera01',
         rtspUrl: '',
         productDetails: []
       }

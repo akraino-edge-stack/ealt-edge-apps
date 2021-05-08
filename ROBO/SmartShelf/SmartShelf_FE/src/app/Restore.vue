@@ -18,22 +18,38 @@
   <div>
     <div class="restore">
       <el-row>
+        <el-col :span="24">
+          <p
+            class="btn-disaster"
+          >
+            <el-button
+              id="disasterBtn"
+              type="primary"
+              dark
+              size="small"
+              @click="disaster()"
+            >
+              {{ $t('Simulate Disaster') }}
+            </el-button>
+          </p>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col span="24">
           <el-tabs
             v-model="activeName"
             class="tabs"
           >
             <el-tab-pane
-              :label="$t('Apps')"
+              :label="$t('Applications')"
               name="Applications"
             >
-              <Applications />
-            </el-tab-pane>
-            <el-tab-pane
-              :label="$t('PVCs')"
-              name="Pvcs"
-            >
-              <Pvcs />
+              <div>
+                <Applications />
+              </div>
+              <div>
+                <Pvcs />
+              </div>
             </el-tab-pane>
             <el-tab-pane
               :label="$t('Backup')"
@@ -59,8 +75,9 @@ import Applications from '@/app/Applications'
 import Backups from '@/app/Backups'
 import Pvcs from '@/app/Pvcs'
 import Restores from '@/app/Restores'
+import { robo } from '@/tools/request'
 export default {
-  name: 'Sysk8s',
+  name: 'Restore',
   components: {
     Restores,
     Pvcs,
@@ -83,6 +100,13 @@ export default {
   computed: {
   },
   methods: {
+    disaster () {
+      robo.simulateDisaster().then(response => {
+      }).catch((error) => {
+        console.log(error)
+        this.$message.error(this.$t('failed to simulate disaster'))
+      })
+    }
   }
 }
 </script>
@@ -105,6 +129,11 @@ export default {
     float: left;
   }
 }
+.btn-disaster {
+  margin-right: 30px;
+  margin-top: 20px;
+  float: right;
+}
 .notifications{
   margin-right: 5%;
   height: 100%;
@@ -119,5 +148,10 @@ export default {
 }
 .el-col{
   padding-left:0 !important;
+}
+.sub-tabs-header {
+  margin-left: 30px;
+  font-size: medium;
+  font-weight: 600;
 }
 </style>

@@ -23,19 +23,11 @@
         :ip-item="false"
         @getSearchData="getSearchData"
       />
-      <p
-        class="btn-disaster"
-      >
-        <el-button
-          id="disasterBtn"
-          type="primary"
-          dark
-          size="small"
-          @click="disaster()"
-        >
-          {{ $t('Simulate Disaster') }}
-        </el-button>
-      </p>
+      <el-badge
+        value="PVCs"
+        class="badge"
+        width="100%"
+      />
       <div class="tableDiv">
         <el-row class="table">
           <el-table
@@ -151,13 +143,6 @@ export default {
     getCurrentPageData (data) {
       this.currPageTableData = data
     },
-    disaster () {
-      robo.simulateDisaster().then(response => {
-      }).catch((error) => {
-        console.log(error)
-        this.$message.error(this.$t('failed to simulate disaster'))
-      })
-    },
     getPvcsListInPage () {
       robo.getAppsList().then(response => {
         this.tableData = this.paginationData = response.data.pvcData
@@ -208,9 +193,5 @@ export default {
 }
 .el-col{
   padding-left:0 !important;
-}
-.btn-disaster {
-  margin-left: 30px;
-  margin-top: 20px;
 }
 </style>

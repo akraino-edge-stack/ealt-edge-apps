@@ -15,44 +15,77 @@
  */
 <template>
   <div class="notifications">
-    <el-row>
-      <el-col :span="6">
-        <h1
-          style="font-weight: 600;
-                   margin-bottom: 10px;"
+    <div class="tableDiv">
+      <el-row class="table">
+        <el-table
+          :data="currPageTableData"
+          v-loading="dataLoading"
+          class="mt0"
+          size="mini"
+          :show-header="false"
+          style="width: 100%;"
         >
-          {{ $t('Events') }}
-        </h1>
-      </el-col>
-      <el-col :span="18">
-        <Search
-          :status-item="false"
-          :affinity-item="false"
-          :ip-item="false"
-          @getSearchData="getSearchData"
+          <el-table-column
+            prop="notificationType"
+            width="300px"
+            :label="$t('Type')"
+          >
+            <template slot-scope="scope">
+              <div
+                class="notificationTag"
+                v-if="scope.row.notificationType === 'Needs Filling' || scope.row.notificationType === 'Over Filled'"
+              >
+                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+              </div>
+              <div
+                class="notificationTagMismatched"
+                v-if="scope.row.notificationType === 'Product Mismatch'"
+              >
+                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+              </div>
+              <div>
+                <span>{{ scope.row.msg }}</span>
+              </div>
+              <div>
+                <i
+                  style="margin-right: 8px"
+                  class="el-icon-time"
+                />
+                <span style="font-size: 10px">{{ scope.row.time }} </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            width="45px"
+            :label="$t('Action')"
+          >
+            <template slot-scope="scope">
+              <el-button
+                id="details"
+                @click.native.prevent="handleDetail(scope.row)"
+                type="text"
+                size="mini"
+              >
+                <img
+                  class="cp"
+                  src="../assets/images/image_new.svg"
+                  alt=""
+                  style="width: 20px;"
+                >
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-row>
+      <div class="pageBar2">
+        <pagination
+          :page-sizes="[10,15,20,25]"
+          :table-data="paginationData"
+          @getCurrentPageData="getCurrentPageData"
         />
-      </el-col>
-    </el-row>
-    <el-tabs
-      v-model="activeName"
-    >
-      <el-tab-pane name="All">
-        <span slot="label"><i class="el-icon-message-solid" />
-          All</span>
+      </div>
+    </div>
 
-        <AllEvents
-          :get-shelf-notification-list="getShelfNotificationListInPage"
-          :all-messages-data="allMessages"
-        />
-      </el-tab-pane>
-      <el-tab-pane name="Alert">
-        <span slot="label"><i class="el-icon-warning" />Alert</span>
-        <Alerts
-          :get-shelf-alert-notification-list="getShelfAlertNotificationListInPage"
-          :alert-messages-data="alertMessages"
-        />
-      </el-tab-pane>
-    </el-tabs>
     <el-dialog
       :close-on-click-modal="false"
       :title="$t('Latest Customer Action')"
@@ -70,45 +103,50 @@
 
 <script>
 import { robo } from '../tools/request.js'
-import Search from '../components/Search2.vue'
-import io from 'socket.io-client'
-import AllEvents from './AllEvents.vue'
-import Alerts from './Alerts.vue'
+import pagination from '../components/Pagination.vue'
 export default {
-  name: 'Notifications',
+  name: 'AllEvents',
   props: {
+    getShelfNotificationList:
+        {
+          type: Function,
+          required: true
+        },
+    allMessagesData:
+        {
+          type: Array,
+          required: true
+        }
   },
   components: {
-    AllEvents,
-    Alerts,
-    Search
+    pagination
   },
   data () {
     return {
       image: {},
-      activeName: 'All',
-      allMessages: [],
-      alertMessages: [],
+      paginationData: [],
+      currPageTableData: [],
       dataLoading: true,
+      tableData: [],
       dialogVisibleImage: false,
       rlp: sessionStorage.getItem('rlp')
     }
   },
   mounted () {
-    this.getShelfNotificationListInPage()
-    this.getShelfAlertNotificationListInPage()
+    this.getShelfNotificationList()
   },
   computed: {
   },
-  created () {
-    // Client receives the message:
-    const socket = io.connect('http://localhost:5000/')
-    socket.on('notify', (data) => {
-      this.getShelfNotificationListInPage()
-      this.getShelfAlertNotificationListInPage()
-      this.$emit('onChange')
-      this.$emit('OnChangeLowList')
-    })
+  watch: {
+    allMessagesData (val) {
+      if (val.length > 0) {
+        this.tableData = this.paginationData = val
+        this.dataLoading = false
+      } else {
+        this.tableData = this.paginationData = []
+        this.dataLoading = false
+      }
+    }
   },
   methods: {
     handleDetail (row) {
@@ -116,17 +154,8 @@ export default {
       this.dialogVisibleImage = true
     },
     filterTableData (val, key) {
-      console.log('filtertable data', val, key)
-      this.alertMessages = this.alertMessages.filter(item => {
+      this.paginationData = this.paginationData.filter(item => {
         let itemVal = item[key]
-        console.log(itemVal)
-        console.log(itemVal.toLowerCase().indexOf(val) > -1)
-        if (itemVal) return itemVal.toLowerCase().indexOf(val) > -1
-      })
-      this.allMessages = this.allMessages.filter(item => {
-        let itemVal = item[key]
-        console.log(itemVal)
-        console.log(itemVal.toLowerCase().indexOf(val) > -1)
         if (itemVal) return itemVal.toLowerCase().indexOf(val) > -1
       })
     },
@@ -135,25 +164,13 @@ export default {
     },
     getShelfNotificationListInPage () {
       robo.getShelfNotificationList().then(response => {
-        this.allMessages = response.data.Notifications
+        this.tableData = this.paginationData = response.data.Notifications
+        this.currPageTableData = this.tableData
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false
         if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
-          this.allMessages = []
-        } else {
-          this.$message.error(this.$t('failed to get notifications list'))
-        }
-      })
-    },
-    getShelfAlertNotificationListInPage () {
-      robo.getShelfAlertNotificationList().then(response => {
-        this.alertMessages = response.data.Notifications
-        this.dataLoading = false
-      }).catch((error) => {
-        this.dataLoading = false
-        if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
-          this.alertMessages = []
+          this.tableData = this.paginationData = []
         } else {
           this.$message.error(this.$t('failed to get notifications list'))
         }
@@ -161,23 +178,19 @@ export default {
     },
     getSearchData (data) {
       this.paginationData = this.tableData
-      let reset = false
-      if (this.allMessages && this.allMessages.length > 0) {
+      if (this.paginationData && this.paginationData.length > 0) {
+        let reset = false
         for (let key in data) {
           if (data[key]) {
             reset = true
-            let dataKey = 'msg'
-            if (key === 'shelfName') {
-              dataKey = 'msg'
+            let dataKey = key
+            if (key === 'name') {
+              dataKey = 'name'
             }
             this.filterTableData(data[key].toLowerCase(), dataKey)
           }
         }
-      }
-      if (!reset) {
-        console.log('reset is false')
-        this.getShelfNotificationListInPage()
-        this.getShelfAlertNotificationListInPage()
+        if (!reset) this.paginationData = this.tableData
       }
     },
     handleError (error) {
@@ -249,9 +262,18 @@ export default {
 }
 .notificationTag {
   width: 100px;
-  background-color: #fef0f0;
-  border-color: #fde2e2;
-  color: #f56c6c;
+  background-color: #F56C6C;
+  border-color: red;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  font-size: small;
+}
+.notificationTagMismatched {
+  width: 100px;
+  background-color: #fdf6ec;
+  border-color: #faecd8;
+  color: #e6a23c;
   border-radius: 4px;
   text-align: center;
   font-size: small;

@@ -33,7 +33,7 @@
             alt=""
             style="width: 40px;"
           >
-          <h1 class="project-header">ROBO</h1>
+          <h1 class="project-header">Smart Shelf</h1>
         </div>
       </el-col>
       <el-col
@@ -147,7 +147,7 @@ export default {
   top: 0px;
   width: 100%;
   position: fixed;
-  z-index: 2;
+  z-index: 12;
   .logo {
     height: 65px;
     width: 430px;
