@@ -29,7 +29,7 @@
           v-if="nameItem"
         >
           <el-input
-            id="name"
+            id="shelfName"
             maxlength="20"
             v-model="formData.shelfName"
             :placeholder="$t('ShelfName')"

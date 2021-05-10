@@ -16,12 +16,13 @@
 
 <template>
   <div>
-    <Search
-      :status-item="false"
-      :affinity-item="false"
-      :ip-item="false"
-      @getSearchData="getSearchData"
-    />
+    <el-row>
+      <el-col :span="24">
+        <Search
+          @getSearchData="getSearchData"
+        />
+      </el-col>
+    </el-row>
     <div class="tableDiv">
       <el-row class="table">
         <el-table
@@ -35,7 +36,7 @@
           <el-table-column
             prop="shelfName"
             sortable
-            :label="$t('Name')"
+            :label="$t('ShelfName')"
             width="120px"
             header-align="center"
             align="center"
@@ -169,7 +170,6 @@ export default {
   watch: {
     lowShelfData (val) {
       if (val.length > 0) {
-        console.log('setting data -> ', val)
         this.tableData = this.paginationData = val
         this.dataLoading = false
       }
@@ -244,6 +244,8 @@ export default {
   padding: 10px 10px;
   .table {
     margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
   .tableDiv {
     margin-top: 10px;

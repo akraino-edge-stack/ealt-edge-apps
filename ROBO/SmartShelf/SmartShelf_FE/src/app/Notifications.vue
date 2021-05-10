@@ -232,12 +232,8 @@ export default {
 }
 .notifications{
   margin-right: 5%;
-  height: 100%;
+  height: 95%;
   background: #fff;
-  padding: 10px 10px;
-  .table {
-    margin-top: 10px;
-  }
   .el-dialog__body {
     padding: 30px 20px;
     color: #606266;

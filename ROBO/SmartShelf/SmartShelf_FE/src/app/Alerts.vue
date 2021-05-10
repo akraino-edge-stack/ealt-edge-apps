@@ -18,53 +18,59 @@
     <div class="tableDiv">
       <el-row class="table">
         <el-table
-          :data="currPageTableData"
-          v-loading="dataLoading"
-          class="mt0"
-          size="mini"
-          :show-header="false"
-          style="width: 100%;"
+            :data="currPageTableData"
+            v-loading="dataLoading"
+            class="mt0"
+            size="mini"
+            :show-header="false"
+            style="width: 100%;"
         >
           <el-table-column
-            prop="notificationType"
-            width="300px"
-            :label="$t('Type')"
+              prop="notificationType"
+              width="300px"
+              :label="$t('Type')"
           >
             <template slot-scope="scope">
               <div
-                class="notificationTag"
-                v-if="scope.row.notificationType === 'Needs Filling'"
+                  class="notificationTag"
+                  v-if="scope.row.notificationType === 'Needs Filling' || scope.row.notificationType === 'Over Filled'"
+              >
+                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+              </div>
+              <div
+                  class="notificationTagMismatched"
+                  v-if="scope.row.notificationType === 'Product Mismatch'"
               >
                 <span style="padding: 0">  {{ scope.row.notificationType }} </span>
               </div>
               <div>
-                <span>{{ scope.row.msg }}</span>
+                <span style="font-size: 13px">{{ scope.row.msg }}</span>
               </div>
               <div>
                 <i
-                  style="margin-right: 8px"
-                  class="el-icon-time"
+                    style="margin-right: 8px"
+                    class="el-icon-time"
                 />
                 <span style="font-size: 10px">{{ scope.row.time }} </span>
               </div>
             </template>
           </el-table-column>
           <el-table-column
-            width="50px"
-            :label="$t('Action')"
+              width="45px"
+              :label="$t('Action')"
           >
             <template slot-scope="scope">
               <el-button
-                id="details"
-                @click.native.prevent="handleDetail(scope.row)"
-                type="text"
-                size="mini"
+                  id="details"
+                  @click.native.prevent="handleDetail(scope.row)"
+                  type="text"
+                  size="mini"
               >
                 <img
-                  class="cp"
-                  src="../assets/images/image-simple.svg"
-                  alt=""
-                  style="width: 20px;"
+                    class="cp"
+                    src="../assets/images/image_new.svg"
+                    alt=""
+                    style="width: 20px;"
                 >
               </el-button>
             </template>
@@ -73,23 +79,23 @@
       </el-row>
       <div class="pageBar2">
         <pagination
-          :page-sizes="[10,15,20,25]"
-          :table-data="paginationData"
-          @getCurrentPageData="getCurrentPageData"
+            :page-sizes="[10,15,20,25]"
+            :table-data="paginationData"
+            @getCurrentPageData="getCurrentPageData"
         />
       </div>
     </div>
 
     <el-dialog
-      :close-on-click-modal="false"
-      :title="$t('Latest Customer Action')"
-      :visible.sync="dialogVisibleImage"
-      width="55%"
+        :close-on-click-modal="false"
+        :title="$t('Latest Customer Action')"
+        :visible.sync="dialogVisibleImage"
+        width="55%"
     >
       <img
-        class="image-src"
-        :src="this.image"
-        alt=""
+          class="image-src"
+          :src="this.image"
+          alt=""
       >
     </el-dialog>
   </div>
@@ -98,7 +104,6 @@
 <script>
 import { robo } from '../tools/request.js'
 import pagination from '../components/Pagination.vue'
-import io from 'socket.io-client'
 export default {
   name: 'Alerts',
   props: {
@@ -134,9 +139,7 @@ export default {
   },
   watch: {
     alertMessagesData (val) {
-      console.log('alert msg changed', val)
       if (val.length > 0) {
-        console.log('setting data -> ', val)
         this.tableData = this.paginationData = val
         this.dataLoading = false
       } else {
@@ -214,12 +217,6 @@ export default {
 </script>
 
 <style scoped lang="less">
-.box-card {
-  width: 80px;
-  height: 20px;
-  color: green;
-  padding: 0px !important;
-}
 .image-src {
   margin-bottom: 20px;
 }

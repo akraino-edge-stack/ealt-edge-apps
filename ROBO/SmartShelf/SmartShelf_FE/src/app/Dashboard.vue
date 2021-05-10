@@ -314,10 +314,8 @@ export default {
       })
     },
     getShelfListInPage () {
-      console.log('get shelf list')
       robo.getShelfList().then(response => {
         this.shelfData = response.data.shelfDetails
-        console.log('get shelf list -> ', this.shelfData)
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false
@@ -329,7 +327,6 @@ export default {
       })
     },
     getLowShelfListInPage: function () {
-      console.log('get Low shelf list')
       robo.getShelfList().then(response => {
         let shelfDetails = response.data.shelfDetails
         this.lowShelfData = []

@@ -152,7 +152,7 @@ export default {
   .el-menu {
     display: flex;
     .first-menu {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: bold;
     }
     .second-menu {

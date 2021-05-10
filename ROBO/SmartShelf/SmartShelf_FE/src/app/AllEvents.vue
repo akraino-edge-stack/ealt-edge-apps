@@ -44,7 +44,7 @@
                 <span style="padding: 0">  {{ scope.row.notificationType }} </span>
               </div>
               <div>
-                <span>{{ scope.row.msg }}</span>
+                <span style="font-size: 13px">{{ scope.row.msg }}</span>
               </div>
               <div>
                 <i
@@ -217,12 +217,6 @@ export default {
 </script>
 
 <style scoped lang="less">
-.box-card {
-  width: 80px;
-  height: 20px;
-  color: green;
-  padding: 0px !important;
-}
 .image-src {
   margin-bottom: 20px;
 }
