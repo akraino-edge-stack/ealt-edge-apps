@@ -32,19 +32,26 @@
           >
             <template slot-scope="scope">
               <div
-                class="notificationTag"
-                v-if="scope.row.notificationType === 'Needs Filling' || scope.row.notificationType === 'Over Filled'"
+                class="notificationTagPartiallyFilled"
+                v-if="scope.row.notificationType === 'Partially Filled'"
               >
                 <span style="padding: 0">  {{ scope.row.notificationType }} </span>
               </div>
               <div
-                class="notificationTagMismatched"
-                v-if="scope.row.notificationType === 'Product Mismatch'"
+                class="notificationTagMostlyFilled"
+                v-else-if="scope.row.notificationType === 'Mostly Filled'"
               >
                 <span style="padding: 0">  {{ scope.row.notificationType }} </span>
               </div>
+              <div
+                class="notificationTag"
+                v-else
+              >
+                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+              </div>
+
               <div>
-                <span>{{ scope.row.msg }}</span>
+                <span style="font-size: 13px">{{ scope.row.msg }}</span>
               </div>
               <div>
                 <i
@@ -217,12 +224,6 @@ export default {
 </script>
 
 <style scoped lang="less">
-.box-card {
-  width: 80px;
-  height: 20px;
-  color: green;
-  padding: 0px !important;
-}
 .image-src {
   margin-bottom: 20px;
 }
@@ -263,17 +264,26 @@ export default {
 .notificationTag {
   width: 100px;
   background-color: #F56C6C;
-  border-color: red;
+  border-color: #F56C6C;
   color: white;
   border-radius: 4px;
   text-align: center;
   font-size: small;
 }
-.notificationTagMismatched {
+.notificationTagPartiallyFilled {
   width: 100px;
-  background-color: #fdf6ec;
-  border-color: #faecd8;
-  color: #e6a23c;
+  background-color: #e6a23c;
+  border-color: #e6a23c;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  font-size: small;
+}
+.notificationTagMostlyFilled {
+  width: 100px;
+  background-color: #67c23a;
+  border-color: #67c23a;
+  color: white;
   border-radius: 4px;
   text-align: center;
   font-size: small;

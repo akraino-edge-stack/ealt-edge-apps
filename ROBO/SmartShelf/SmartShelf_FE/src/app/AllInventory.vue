@@ -16,12 +16,13 @@
 
 <template>
   <div>
-    <Search
-      :status-item="false"
-      :affinity-item="false"
-      :ip-item="false"
-      @getSearchData="getSearchData"
-    />
+    <el-row>
+      <el-col :span="24">
+        <Search
+          @getSearchData="getSearchData"
+        />
+      </el-col>
+    </el-row>
     <div class="tableDiv">
       <el-row class="table">
         <el-table
@@ -70,14 +71,14 @@
                   <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
                 </div>
                 <div
-                  style="width: 80px; height: 20px; background-color: red; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
-                  v-else-if="item.status === 'Needs Filling'"
+                  style="width: 80px; height: 20px; background-color: orange; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
+                  v-else-if="item.status === 'Partially Filled'"
                 >
                   <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
                 </div>
                 <div
-                  style="width: 80px; height: 20px; background-color: orange; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
-                  v-else-if="item.status === 'Partially Filled'"
+                  style="width: 80px; height: 20px; background-color: red; border-radius: 4px; color: white; margin: 4px; padding: 0px; display: inline-block"
+                  v-else
                 >
                   <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
                 </div>
@@ -169,7 +170,6 @@ export default {
   watch: {
     shelfData (val) {
       if (val.length > 0) {
-        console.log('setting data -> ', val)
         this.tableData = this.paginationData = val
         this.dataLoading = false
       }
@@ -245,6 +245,8 @@ export default {
   padding: 10px 10px;
   .table {
     margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
   .tableDiv {
     margin-top: 10px;

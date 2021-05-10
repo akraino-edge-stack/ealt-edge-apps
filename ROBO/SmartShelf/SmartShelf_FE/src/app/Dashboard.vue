@@ -128,7 +128,19 @@
                       :prop="`productDetails[${index}].obj`"
                       style="display:inline-block;"
                     >
-                      <el-input v-model="product.obj" />
+                      <el-select
+                        id="productName"
+                        v-model="product.obj"
+                        :placeholder="$t('Name')"
+                        style="display:inline-block;"
+                      >
+                        <el-option
+                          v-for="(item, i) in productList"
+                          :key="i"
+                          :label="item"
+                          :value="item"
+                        />
+                      </el-select>
                     </el-form-item>
                     <el-form-item
                       label="Max Count"
@@ -219,6 +231,7 @@ export default {
   },
   data () {
     return {
+      productList: ['Bottle', 'ToyCar'],
       shelfData: [],
       lowShelfData: [],
       activeName: 'All Inventory',
@@ -291,6 +304,7 @@ export default {
     addShelf () {
       this.title = this.$t('Add Shelf')
       this.resetForm()
+      this.getProductList()
       this.dialogVisible = true
     },
     beforeUpload (file) {
@@ -314,10 +328,8 @@ export default {
       })
     },
     getShelfListInPage () {
-      console.log('get shelf list')
       robo.getShelfList().then(response => {
         this.shelfData = response.data.shelfDetails
-        console.log('get shelf list -> ', this.shelfData)
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false
@@ -329,7 +341,6 @@ export default {
       })
     },
     getLowShelfListInPage: function () {
-      console.log('get Low shelf list')
       robo.getShelfList().then(response => {
         let shelfDetails = response.data.shelfDetails
         this.lowShelfData = []
@@ -351,6 +362,18 @@ export default {
           this.lowShelfData = []
         } else {
           this.$message.error(this.$t('failed to shelf list'))
+        }
+      })
+    },
+    getProductList () {
+      robo.getProductList().then(response => {
+        this.productList = response.data
+      }).catch((error) => {
+        this.dataLoading = false
+        if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
+          this.productList = []
+        } else {
+          this.$message.error(this.$t('failed to product list'))
         }
       })
     },
