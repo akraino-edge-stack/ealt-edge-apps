@@ -32,13 +32,26 @@
           >
             <template slot-scope="scope">
               <div
-                class="notificationTag"
-                v-if="scope.row.notificationType === 'Needs Filling'"
+                class="notificationTagPartiallyFilled"
+                v-if="scope.row.notificationType === 'Partially Filled'"
               >
                 <span style="padding: 0">  {{ scope.row.notificationType }} </span>
               </div>
+              <div
+                class="notificationTagMostlyFilled"
+                v-else-if="scope.row.notificationType === 'Mostly Filled'"
+              >
+                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+              </div>
+              <div
+                class="notificationTag"
+                v-else
+              >
+                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+              </div>
+
               <div>
-                <span>{{ scope.row.msg }}</span>
+                <span style="font-size: 13px">{{ scope.row.msg }}</span>
               </div>
               <div>
                 <i
@@ -50,7 +63,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            width="50px"
+            width="45px"
             :label="$t('Action')"
           >
             <template slot-scope="scope">
@@ -62,7 +75,7 @@
               >
                 <img
                   class="cp"
-                  src="../assets/images/image-simple.svg"
+                  src="../assets/images/image_new.svg"
                   alt=""
                   style="width: 20px;"
                 >
@@ -98,7 +111,6 @@
 <script>
 import { robo } from '../tools/request.js'
 import pagination from '../components/Pagination.vue'
-import io from 'socket.io-client'
 export default {
   name: 'Alerts',
   props: {
@@ -134,9 +146,7 @@ export default {
   },
   watch: {
     alertMessagesData (val) {
-      console.log('alert msg changed', val)
       if (val.length > 0) {
-        console.log('setting data -> ', val)
         this.tableData = this.paginationData = val
         this.dataLoading = false
       } else {
@@ -214,12 +224,6 @@ export default {
 </script>
 
 <style scoped lang="less">
-.box-card {
-  width: 80px;
-  height: 20px;
-  color: green;
-  padding: 0px !important;
-}
 .image-src {
   margin-bottom: 20px;
 }
@@ -260,7 +264,25 @@ export default {
 .notificationTag {
   width: 100px;
   background-color: #F56C6C;
-  border-color: red;
+  border-color: #F56C6C;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  font-size: small;
+}
+.notificationTagPartiallyFilled {
+  width: 100px;
+  background-color: #e6a23c;
+  border-color: #e6a23c;
+  color: white;
+  border-radius: 4px;
+  text-align: center;
+  font-size: small;
+}
+.notificationTagMostlyFilled {
+  width: 100px;
+  background-color: #67c23a;
+  border-color: #67c23a;
   color: white;
   border-radius: 4px;
   text-align: center;

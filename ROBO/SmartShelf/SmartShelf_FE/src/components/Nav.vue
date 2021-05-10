@@ -91,7 +91,7 @@ export default {
   data () {
     return {
       jsonData: [],
-      language: 'cn',
+      language: 'en',
       lang: 'English',
       smallMenu: false
     }
@@ -103,10 +103,10 @@ export default {
   },
   mounted () {
     this.jsonData = NavData
-    this.language = localStorage.getItem('language') || 'cn'
+    this.language = localStorage.getItem('language') || 'en'
     this.$i18n.locale = this.language
     if (!localStorage.getItem('language')) {
-      localStorage.setItem('language', 'cn')
+      localStorage.setItem('language', 'en')
     }
   },
   methods: {
