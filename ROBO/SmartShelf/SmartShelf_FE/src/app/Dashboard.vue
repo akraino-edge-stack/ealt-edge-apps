@@ -367,7 +367,7 @@ export default {
     },
     getProductList () {
       robo.getProductList().then(response => {
-        this.productList = response.data
+        this.productList = response.data.ObjList
       }).catch((error) => {
         this.dataLoading = false
         if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {

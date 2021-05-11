@@ -87,7 +87,7 @@ let robo = {
     return GET(shelfApi + '/table')
   },
   getProductList () {
-    return GET(shelfApi + '/products')
+    return GET(shelfApi + '/ObjList')
   },
   getShelfNotificationList () {
     return GET(shelfApi + '/messages')
