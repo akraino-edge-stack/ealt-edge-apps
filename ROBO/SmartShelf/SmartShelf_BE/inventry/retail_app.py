@@ -52,7 +52,7 @@ listOfVideos = []
 listOfShelfTables = []
 listOfProducts = []
 TableIndex = 0
-
+listOfObj = ['Bottle', 'ToyCar', 'ToyTrain', 'ToyBus']
 
 HTTP_URL = "http://"
 HTTPS_URL = "https://"
@@ -296,81 +296,127 @@ def video(video_capture, shelf_info, TableIndex):
 def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
     notifyFlag = 0
-    bottleCnt = 0
-    carCnt = 0
+    obj1Cnt = 0
+    obj2Cnt = 0
 
-    if ('Bottle' == shelf_info['productDetails'][0]['obj']):
-        bottelMax = shelf_info['productDetails'][0]['MaxCount']
-        carMax = shelf_info['productDetails'][1]['MaxCount']
-        bottelIndex = 0
-
-    else:
-        carMax = shelf_info['productDetails'][0]['MaxCount']
-        bottelMax = shelf_info['productDetails'][1]['MaxCount']
-        bottelIndex = 1
+    productCnt = len(shelf_info['productDetails'])
+    if productCnt == 1:
+        obj1 = shelf_info['productDetails'][0]['obj']
+        obj1MaxCount = shelf_info['productDetails'][0]['MaxCount']
+    else :
+        obj1 = shelf_info['productDetails'][0]['obj']
+        obj1MaxCount = shelf_info['productDetails'][0]['MaxCount']
+        obj2 = shelf_info['productDetails'][1]['obj']
+        obj2MaxCount = shelf_info['productDetails'][1]['MaxCount']
 
     objData = data['objDetails']
     for obj in objData:
         objType = obj['objtype']
         objCount = obj['objcount']
-        if (objType == 'bottle') :
-            bottleCnt = objCount
-            if (objCount >= bottelMax):
-                bottleStatus = "Over Filled"
+
+        if objType == "bottle" :
+            objType = 'Bottle'
+        elif objType == "car" :
+            objType = 'ToyCar'
+        elif objType == "train" :
+            objType = 'ToyTrain'
+        elif objType == "bus" :
+            objType = 'ToyBus'
+
+        if productCnt == 1:
+            if ((objType != obj1) and (objType != 'person')) :
+                notifyFlag = 3
+
+            if (objType == obj1):
+                obj1Cnt = objCount
+                if (objCount >= obj1MaxCount):
+                    obj1Status = "Over Filled"
+                    notifyFlag = 1
+                elif (objCount >= obj1MaxCount * 70 / 100):
+                    obj1Status = "Mostly Filled"
+                elif (objCount > obj1MaxCount * 30 / 100):
+                    obj1Status = "Partially Filled"
+                else:
+                    obj1Status = "Needs Filling"
+                    notifyFlag = 1
+
+            if (obj1Cnt == 0) :
+                obj1Status = "Needs Filling"
                 notifyFlag = 1
-            elif (objCount >= bottelMax*70/100):
-                bottleStatus = "Mostly Filled"
-            elif (objCount > bottelMax*30/100):
-                bottleStatus = "Partially Filled"
-            else:
-                bottleStatus = "Needs Filling"
+
+            shelfTable = {'shelfName': shelf_info['shelfName'],
+                          'location': shelf_info['location'],
+                          'camName': shelf_info['camName'],
+                          "productDetails": [
+                              {
+                                  "productType": obj1,
+                                  "maxCount": obj1MaxCount,
+                                  "currentCount": obj1Cnt,
+                                  "status": obj1Status
+                              }
+                          ]
+                          }
+
+        if productCnt == 2:
+            if ((objType != obj1) and (objType != obj2) and (objType !=
+                                                             'person')):
+                notifyFlag = 3
+
+            if (objType == obj1):
+                obj1Cnt = objCount
+                if (objCount >= obj1MaxCount):
+                    obj1Status = "Over Filled"
+                    notifyFlag = 1
+                elif (objCount >= obj1MaxCount * 70 / 100):
+                    obj1Status = "Mostly Filled"
+                elif (objCount > obj1MaxCount * 30 / 100):
+                    obj1Status = "Partially Filled"
+                else:
+                    obj1Status = "Needs Filling"
+                    notifyFlag = 1
+
+            if (objType == obj2):
+                obj2Cnt = objCount
+                if (objCount >= obj2MaxCount):
+                    obj2Status = "Over Filled"
+                    notifyFlag = 2
+                elif (objCount >= obj2MaxCount * 70 / 100):
+                    obj2Status = "Mostly Filled"
+                elif (objCount > obj2MaxCount * 30 / 100):
+                    obj2Status = "Partially Filled"
+                else:
+                    obj2Status = "Needs Filling"
+                    notifyFlag = 2
+
+            if (obj1Cnt == 0) :
+                obj1Status = "Needs Filling"
                 notifyFlag = 1
-
-        if (objType == 'car') :
-            carCnt = objCount
-            if (objCount >= carMax):
-                Carstatus = "Over Filled"
-                notifyFlag = 2
-            if (objCount >= carMax*70/100):
-                Carstatus = "Mostly Filled"
-            elif (objCount >= carMax*30/100):
-                Carstatus = "Partially Filled"
-            else:
-                Carstatus = "Needs Filling"
+            if (obj2Cnt == 0) :
+                obj2Status = "Needs Filling"
                 notifyFlag = 2
 
-        if (objType == 'other') :
-            notifyFlag = 3
-
-    if (bottleCnt == 0) :
-        bottleStatus = "Needs Filling"
-        notifyFlag = 1
-    if (carCnt == 0) :
-        Carstatus = "Needs Filling"
-        notifyFlag = 2
-
-    shelfTable = {'shelfName': shelf_info['shelfName'],
-                      'location': shelf_info['location'],
-                      'camName': shelf_info['camName'],
-                      "productDetails": [
-                          {
-                               "productType": "bottle",
-                               "maxCount": bottelMax,
-                               "currentCount": bottleCnt,
-                               "status": bottleStatus
-                          },
-                          {
-                                  "productType": "car",
-                                  "maxCount": carMax,
-                                  "currentCount": carCnt,
-                                  "status": Carstatus
+            shelfTable = {'shelfName': shelf_info['shelfName'],
+                          'location': shelf_info['location'],
+                          'camName': shelf_info['camName'],
+                          "productDetails": [
+                              {
+                                  "productType": obj1,
+                                  "maxCount": obj1MaxCount,
+                                  "currentCount": obj1Cnt,
+                                  "status": obj1Status
+                              },
+                              {
+                                  "productType": obj2,
+                                  "maxCount": obj2MaxCount,
+                                  "currentCount": obj2Cnt,
+                                  "status": obj2Status
                               }
 
                           ]
-                }
+                          }
 
-    print (shelfTable)
-    print (TableIndex)
+    #print (shelfTable)
+    #print (TableIndex)
     if len(listOfShelfTables) > TableIndex :
         listOfShelfTables[TableIndex] = shelfTable
     else :
@@ -380,17 +426,13 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     local_time = time.ctime(time_sec)
     url = FRONTEND_URL + "/notify"
 
-    if (bottleStatus == "Needs Filling") or (bottleStatus == "Over Filled") \
-            or (Carstatus == "Needs Filling") or (Carstatus == "Over Filled")\
-            or notifyFlag == 3:
-        if (bottleStatus == "Needs Filling") or (bottleStatus == "Over "
-                                                                 "Filled"):
-            msg = "Product Bottle " + bottleStatus + "in " + shelf_name
-            status = bottleStatus
-        if (Carstatus == "Needs Filling") or (Carstatus == "Over "
-                                                                 "Filled"):
-            msg = "Product ToyCar " + Carstatus + "in " + shelf_name
-            status = Carstatus
+    if (notifyFlag == 1 or notifyFlag == 2 or notifyFlag == 3) :
+        if notifyFlag == 1 :
+            msg = "Product " + obj1 + ' ' + obj1Status + " in " + shelf_name
+            status = obj1Status
+        if notifyFlag == 2 :
+            msg = "Product " + obj2 + ' ' + obj2Status + " in " + shelf_name
+            status = obj2Status
         if (notifyFlag == 3):
             status = "Product Mismatch"
             msg = "Product are mismatched in " + shelf_name
@@ -401,16 +443,32 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
         shelfNotify = 0
         for i in range(len(listOfAlertsMsgs)) :
-            print ("shelf name in list: {0}, shelf name: {1}".format(
-                listOfAlertsMsgs[i]['shelf'], shelf_name))
             if (listOfAlertsMsgs[i]['shelf'] == shelf_name) :
-                listOfAlertsMsgs[i] = newdict
-                requests.post(url, json=newdict)
                 shelfNotify = 1
+                if  (listOfAlertsMsgs[i]['notificationType'] != status):
+                    listOfAlertsMsgs[i] = newdict
+                    requests.post(url, json=newdict)
 
         if (shelfNotify == 0) :
                 listOfAlertsMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
+
+        if len(listOfMsgs) >= 100:
+            listOfMsgs.pop()
+
+        firstNotify = 1
+        for i in range(len(listOfMsgs)) :
+            if (listOfMsgs[i]['shelf'] == shelf_name) :
+                firstNotify = 0
+                if  (listOfMsgs[i]['notificationType'] != status):
+                    listOfMsgs.insert(0, newdict)
+                break
+
+
+        if firstNotify == 1 :
+            listOfMsgs.insert(0, newdict)
+            requests.post(url, json=newdict)
+
     else :
         for i in range(len(listOfAlertsMsgs)) :
             if (listOfAlertsMsgs[i].shelf == shelf_name) :
@@ -419,8 +477,33 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                 newdict = {"msgid": COUNT, "time": local_time,
                            "notificationType": status,
                            "msg": msg, "shelf": shelf_name}
-                listOfAlertsMsgs.pop(i);
+                listOfAlertsMsgs.pop(i); ## TODO: check for pop of same shelf
                 requests.post(url, json=newdict)
+
+        if len(listOfMsgs) >= 100:
+            listOfMsgs.pop()
+
+        firstNotify = 1
+        ##TODO: handle case for mostly filled and partially filled and
+        # different products notifications
+        for i in range(len(listOfMsgs)):
+            if (listOfMsgs[i]['shelf'] == shelf_name) :
+                firstNotify = 0
+                if (listOfMsgs[i]['notificationType'] != obj1Status):
+                    msg = "Product filled in " + shelf_name
+                    newdict = {"msgid": COUNT, "time": local_time,
+                               "notificationType": obj1Status,
+                               "msg": msg, "shelf": shelf_name}
+                    listOfMsgs.insert(0, newdict)
+                    requests.post(url, json=newdict)
+
+        if firstNotify == 1 :
+            msg = "Product filled in " + shelf_name
+            newdict = {"msgid": COUNT, "time": local_time,
+                       "notificationType": obj1Status,
+                       "msg": msg, "shelf": shelf_name}
+            listOfMsgs.insert(0, newdict)
+            requests.post(url, json=newdict)
 
     return notifyFlag
 
@@ -490,7 +573,7 @@ def shelf_inventory(frame, shelf_info, TableIndex):
 
     notifyFlag = parse_obj_data(data, shelf_info, TableIndex, shelf_info['shelfName'])
 
-    send_notification_msg(shelf_info['shelfName'], notifyFlag, COUNT)
+    # send_notification_msg(shelf_info['shelfName'], notifyFlag, COUNT)
 
     # return ''
 
@@ -659,8 +742,23 @@ def add_shelf():
     app.logger.info("Received message from ClientIP [" + request.remote_addr
                     + "] Operation [" + request.method + "]" +
                     " Resource [" + request.url + "]")
+    productCnt = len(shelf_details['productDetails'])
+    # print('total products are=',productCnt)
 
-    shelf_info = {
+    if productCnt == 1 :
+        shelf_info = {
+        'shelfName': shelf_details['shelfName'],
+        'location': shelf_details['location'],
+        'camName': shelf_details['camName'],
+        'rtspUrl': shelf_details['rtspUrl'],
+        'productDetails': [ {'obj': shelf_details['productDetails'][0]['obj'],
+                             'MaxCount': shelf_details['productDetails'][0][
+                                 'MaxCount']}
+                            ]
+    }
+
+    if productCnt == 2 :
+        shelf_info = {
         'shelfName': shelf_details['shelfName'],
         'location': shelf_details['location'],
         'camName': shelf_details['camName'],
@@ -671,6 +769,27 @@ def add_shelf():
                             {'obj': shelf_details['productDetails'][1][
                                 'obj'],
                              'MaxCount': shelf_details['productDetails'][1][
+                                 'MaxCount']}
+                            ]
+    }
+
+
+    if productCnt == 3 :
+        shelf_info = {
+        'shelfName': shelf_details['shelfName'],
+        'location': shelf_details['location'],
+        'camName': shelf_details['camName'],
+        'rtspUrl': shelf_details['rtspUrl'],
+        'productDetails': [ {'obj': shelf_details['productDetails'][0]['obj'],
+                             'MaxCount': shelf_details['productDetails'][0][
+                                 'MaxCount']},
+                            {'obj': shelf_details['productDetails'][1][
+                                'obj'],
+                             'MaxCount': shelf_details['productDetails'][1][
+                                 'MaxCount']},
+                            {'obj': shelf_details['productDetails'][2][
+                                'obj'],
+                             'MaxCount': shelf_details['productDetails'][2][
                                  'MaxCount']}
                             ]
     }
@@ -760,6 +879,19 @@ def alerts_messages():
     notification = {'Notifications': listOfAlertsMsgs,
         "shelfDetails": listOfShelfTables}
     return jsonify(notification)
+
+
+@app.route('/v1/shelf/ObjList', methods=['GET'])
+def Obj_List():
+    """
+        This method is used to return list of messages
+    """
+    app.logger.info("Received message from ClientIP [" + request.remote_addr
+                    + "] Operation [" + request.method + "]" +
+                    " Resource [" + request.url + "]")
+    # TODO: Add shelf table info when sendig notification
+    ObjList = {'ObjList': listOfObj}
+    return jsonify(ObjList)
 
 
 @app.route('/v1/monitor/cameras/<cameraID>', methods=['GET'])

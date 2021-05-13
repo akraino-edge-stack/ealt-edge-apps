@@ -196,6 +196,10 @@ def Detection(img):
                     carCount = carCount + 1
                 elif ('person' in label):
                     personCount = personCount + 1
+                elif ('train' in label):
+                    trainCount = trainCount + 1
+                elif ('bus' in label):
+                    busCount = busCount + 1
                 else:
                     otherCount = otherCount + 1
 
@@ -204,6 +208,8 @@ def Detection(img):
     print("total item count", count)
     print("bottle item count", bottelCount)
     print("car item count", carCount)
+    print("train item count", trainCount)
+    print("bus item count", busCount)
     print("other item count", otherCount)
 
     if (bottelCount != 0):
@@ -224,6 +230,20 @@ def Detection(img):
         objdict = {
             'objtype': 'person',
             'objcount': personCount
+        }
+        listOfMsgs.append(objdict)
+
+    if (trainCount != 0):
+        objdict = {
+            'objtype': 'train',
+            'objcount': trainCount
+        }
+        listOfMsgs.append(objdict)
+
+    if (busCount != 0):
+        objdict = {
+            'objtype': 'bus',
+            'objcount': busCount
         }
         listOfMsgs.append(objdict)
 
