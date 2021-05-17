@@ -53,6 +53,9 @@ listOfShelfTables = []
 listOfProducts = []
 TableIndex = 0
 listOfObj = ['Bottle', 'ToyCar', 'ToyTrain', 'ToyBus']
+lastObj1Cnt = 0
+lastObj2Cnt = 0
+firstFrame = 1
 
 HTTP_URL = "http://"
 HTTPS_URL = "https://"
@@ -298,6 +301,9 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     notifyFlag = 0
     obj1Cnt = 0
     obj2Cnt = 0
+    global lastObj1Cnt
+    global lastObj2Cnt
+    global firstFrame
 
     productCnt = len(shelf_info['productDetails'])
     if productCnt == 1:
@@ -427,47 +433,118 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     url = FRONTEND_URL + "/notify"
 
     if (notifyFlag == 1 or notifyFlag == 2 or notifyFlag == 3) :
+
         if notifyFlag == 1 :
             msg = "Product " + obj1 + ' ' + obj1Status + " in " + shelf_name
             status = obj1Status
+
+            newdict = {"msgid": COUNT, "time": local_time,
+                       "notificationType": status,
+                       "msg": msg, "shelf": shelf_name}
+
+            shelfNotify = 0
+            for i in range(len(listOfAlertsMsgs)):
+                if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
+                    shelfNotify = 1
+                    if ((listOfAlertsMsgs[i]['notificationType'] != status) and
+                            ( firstFrame == 0 and obj1Cnt != lastObj1Cnt)):
+                        listOfAlertsMsgs[i] = newdict
+                        requests.post(url, json=newdict)
+
+            if (shelfNotify == 0):
+                listOfAlertsMsgs.insert(0, newdict)
+                requests.post(url, json=newdict)
+
+            if len(listOfMsgs) >= 100:
+                listOfMsgs.pop()
+
+            firstNotify = 1
+            for i in range(len(listOfMsgs)):
+                if (listOfMsgs[i]['shelf'] == shelf_name):
+                    firstNotify = 0
+                    if ((listOfMsgs[i]['notificationType'] != status) and
+                            (firstFrame == 0 and obj1Cnt != lastObj1Cnt) ):
+                        listOfMsgs.insert(0, newdict)
+                    break
+
+            if firstNotify == 1:
+                listOfMsgs.insert(0, newdict)
+                requests.post(url, json=newdict)
+
         if notifyFlag == 2 :
             msg = "Product " + obj2 + ' ' + obj2Status + " in " + shelf_name
             status = obj2Status
+
+            newdict = {"msgid": COUNT, "time": local_time,
+                       "notificationType": status,
+                       "msg": msg, "shelf": shelf_name}
+
+            shelfNotify = 0
+            for i in range(len(listOfAlertsMsgs)):
+                if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
+                    shelfNotify = 1
+                    if ((listOfAlertsMsgs[i]['notificationType'] != status) and
+                            (firstFrame == 0 and obj1Cnt != lastObj1Cnt)):
+                        listOfAlertsMsgs[i] = newdict
+                        requests.post(url, json=newdict)
+
+            if (shelfNotify == 0):
+                listOfAlertsMsgs.insert(0, newdict)
+                requests.post(url, json=newdict)
+
+            if len(listOfMsgs) >= 100:
+                listOfMsgs.pop()
+
+            firstNotify = 1
+            for i in range(len(listOfMsgs)):
+                if (listOfMsgs[i]['shelf'] == shelf_name):
+                    firstNotify = 0
+                    if ((listOfMsgs[i]['notificationType'] != status) and
+                            (firstFrame == 0 and obj2Cnt != lastObj2Cnt)):
+                        listOfMsgs.insert(0, newdict)
+                    break
+
+            if firstNotify == 1:
+                listOfMsgs.insert(0, newdict)
+                requests.post(url, json=newdict)
+
         if (notifyFlag == 3):
             status = "Product Mismatch"
             msg = "Product are mismatched in " + shelf_name
 
-        newdict = {"msgid": COUNT, "time": local_time,
-                   "notificationType": status,
-                   "msg": msg, "shelf": shelf_name}
+            newdict = {"msgid": COUNT, "time": local_time,
+                       "notificationType": status,
+                       "msg": msg, "shelf": shelf_name}
 
-        shelfNotify = 0
-        for i in range(len(listOfAlertsMsgs)) :
-            if (listOfAlertsMsgs[i]['shelf'] == shelf_name) :
-                shelfNotify = 1
-                if  (listOfAlertsMsgs[i]['notificationType'] != status):
-                    listOfAlertsMsgs[i] = newdict
-                    requests.post(url, json=newdict)
+            shelfNotify = 0
+            for i in range(len(listOfAlertsMsgs)):
+                if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
+                    shelfNotify = 1
+                    if ((listOfAlertsMsgs[i]['notificationType'] != status) and
+                            (firstFrame == 0 and obj1Cnt != lastObj1Cnt)):
+                        listOfAlertsMsgs[i] = newdict
+                        requests.post(url, json=newdict)
 
-        if (shelfNotify == 0) :
+            if (shelfNotify == 0):
                 listOfAlertsMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
 
-        if len(listOfMsgs) >= 100:
-            listOfMsgs.pop()
+            if len(listOfMsgs) >= 100:
+                listOfMsgs.pop()
 
-        firstNotify = 1
-        for i in range(len(listOfMsgs)) :
-            if (listOfMsgs[i]['shelf'] == shelf_name) :
-                firstNotify = 0
-                if  (listOfMsgs[i]['notificationType'] != status):
-                    listOfMsgs.insert(0, newdict)
-                break
+            firstNotify = 1
+            for i in range(len(listOfMsgs)):
+                if (listOfMsgs[i]['shelf'] == shelf_name):
+                    firstNotify = 0
+                    if ((listOfMsgs[i]['notificationType'] != status) and
+                            (firstFrame == 0 and obj1Cnt != lastObj1Cnt)):
+                        listOfMsgs.insert(0, newdict)
+                    break
 
+            if firstNotify == 1:
+                listOfMsgs.insert(0, newdict)
+                requests.post(url, json=newdict)
 
-        if firstNotify == 1 :
-            listOfMsgs.insert(0, newdict)
-            requests.post(url, json=newdict)
 
     else :
         for i in range(len(listOfAlertsMsgs)) :
@@ -504,6 +581,10 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                        "msg": msg, "shelf": shelf_name}
             listOfMsgs.insert(0, newdict)
             requests.post(url, json=newdict)
+
+    firstFrame = 0
+    lastObj1Cnt = obj1Cnt
+    lastObj2Cnt = obj2Cnt
 
     return notifyFlag
 

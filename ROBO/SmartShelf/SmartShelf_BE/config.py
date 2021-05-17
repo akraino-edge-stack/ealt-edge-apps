@@ -52,5 +52,5 @@ Obj_Det = os.environ.get("OBJ_DETECTION", "mep/v1/obj_detection")
 # detection_url = "http://" + api_gateway + "/" + Obj_Det
 detection_url = "http://" + Obj_Det_SER_IP + ":" + Obj_Det_SER_PORT + "/" + \
                                            Obj_Det + "/"
-FE_SERVICE = os.environ.get("FE_SERVICE", "shelf-proxy-service:5000")
-
+#FE_SERVICE = os.environ.get("FE_SERVICE", "shelf-proxy-service:5000")
+FE_SERVICE = os.environ.get("FE_SERVICE", "localhost:5000")
