@@ -393,14 +393,13 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     if (filledFlag == 1 or filledFlag == 2) :
         if filledFlag == 1 :
             for i in range(len(listOfAlertsMsgs)):
-                if (listOfAlertsMsgs[i].shelf == shelf_name):
+                if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
                     status = obj1Status
                     msg = "Product " + obj1Status + " in " + shelf_name
                     newdict = {"msgid": COUNT, "time": local_time,
                                "notificationType": status,
                                "msg": msg, "shelf": shelf_name}
-                    listOfAlertsMsgs.pop(
-                        i);  ## TODO: check for pop of same shelf
+                    listOfAlertsMsgs.pop(i);  ## TODO: check for pop of same shelf
                     requests.post(url, json=newdict)
 
             if len(listOfMsgs) >= 100:
@@ -414,7 +413,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     firstNotify = 0
                     if (listOfMsgs[i]['notificationType'] != obj1Status):
                         status = obj1Status
-                        msg = "Product " + obj1Status + " in " + shelf_name
+                        msg = "Product " + obj1 + " " + obj1Status + " in " + \
+                              shelf_name
                         newdict = {"msgid": COUNT, "time": local_time,
                                    "notificationType": obj1Status,
                                    "msg": msg, "shelf": shelf_name}
@@ -423,7 +423,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     break
 
             if firstNotify == 1:
-                msg = "Product " + obj1Status + " in " + shelf_name
+                msg = "Product " + obj1 + " " + obj1Status + " in " + \
+                      shelf_name
                 newdict = {"msgid": COUNT, "time": local_time,
                            "notificationType": obj1Status,
                            "msg": msg, "shelf": shelf_name}
@@ -432,9 +433,10 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
         if filledFlag == 2 :
             for i in range(len(listOfAlertsMsgs)):
-                if (listOfAlertsMsgs[i].shelf == shelf_name):
+                if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
                     status = obj2Status
-                    msg = "Product " + obj2Status + " in " + shelf_name
+                    msg = "Product " + obj2 + " " + obj2Status + " in " + \
+                          shelf_name
                     newdict = {"msgid": COUNT, "time": local_time,
                                "notificationType": status,
                                "msg": msg, "shelf": shelf_name}
@@ -453,7 +455,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     firstNotify = 0
                     if (listOfMsgs[i]['notificationType'] != obj2Status):
                         status = obj2Status
-                        msg = "Product " + obj2Status + " in " + shelf_name
+                        msg = "Product " + obj2 + " " + obj2Status + " in " \
+                              + shelf_name
                         newdict = {"msgid": COUNT, "time": local_time,
                                    "notificationType": obj2Status,
                                    "msg": msg, "shelf": shelf_name}
@@ -462,7 +465,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     break
 
             if firstNotify == 1:
-                msg = "Product " + obj2Status + " in " + shelf_name
+                msg = "Product " + obj2 + " " + obj2Status + " in " + \
+                      shelf_name
                 newdict = {"msgid": COUNT, "time": local_time,
                            "notificationType": obj2Status,
                            "msg": msg, "shelf": shelf_name}
@@ -523,7 +527,7 @@ def shelf_inventory(frame, shelf_info, TableIndex):
     if COUNT > 100 :
         COUNT = 0
 
-    print('detection url is', url)
+    #print('detection url is', url)
     imencoded = cv2.imencode(".jpg", frame)[1]
     file = {'file': (
             'image.jpg', imencoded.tostring(), 'image/jpeg',
