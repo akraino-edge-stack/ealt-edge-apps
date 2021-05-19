@@ -126,23 +126,27 @@ def video(video_capture, shelf_info, TableIndex):
 
         count = 0
         process_this_frame = process_this_frame + 1
-        if process_this_frame == 21:
+        if process_this_frame == 20:
             process_this_frame = 0
 
         # _, _ = cv2.imencode('.jpg', frame)
-        time.sleep(.01)
+        #time.sleep(.01)
+        time.sleep(.02)
     return 'SampleString'
 
 
 def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
-    notifyFlag = 0
     obj1Cnt = 0
     obj2Cnt = 0
     global lastObj1Cnt
     global lastObj2Cnt
     global firstFrame
-    filledFlag = 0
+    filledFlagObj1 = 0
+    notifyFlagObj1 = 0
+    filledFlagObj2 = 0
+    notifyFlagObj2 = 0
+    productMismatch = 0
 
     productCnt = len(shelf_info['productDetails'])
     if productCnt == 1:
@@ -170,63 +174,63 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
         if productCnt == 1:
 
-            if ((objType != obj1) and (objType != 'person')) :
-                notifyFlag = 3
+            if ((objType != obj1) and (objType != 'person') ) :
+                productMismatch = 1
 
             if (objType == obj1):
                 obj1Cnt = objCount
                 if (objCount > obj1MaxCount):
                     obj1Status = "Over Filled"
-                    notifyFlag = 1
+                    notifyFlagObj1 = 1
                 elif (objCount >= obj1MaxCount * 70 / 100):
                     obj1Status = "Mostly Filled"
-                    filledFlag = 1
+                    filledFlagObj1 = 1
                 elif (objCount > obj1MaxCount * 30 / 100):
                     obj1Status = "Partially Filled"
-                    filledFlag = 1
+                    filledFlagObj1 = 1
                 else:
                     obj1Status = "Needs Filling"
-                    notifyFlag = 1
+                    notifyFlagObj1 = 1
 
         if productCnt == 2:
             if ((objType != obj1) and (objType != obj2) and (objType !=
                                                              'person')):
-                notifyFlag = 3
+                productMismatch = 1
 
             if (objType == obj1):
                 obj1Cnt = objCount
                 if (objCount > obj1MaxCount):
                     obj1Status = "Over Filled"
-                    notifyFlag = 1
+                    notifyFlagObj1 = 1
                 elif (objCount >= obj1MaxCount * 70 / 100):
                     obj1Status = "Mostly Filled"
-                    filledFlag = 1
+                    filledFlagObj1 = 1
                 elif (objCount > obj1MaxCount * 30 / 100):
                     obj1Status = "Partially Filled"
-                    filledFlag = 1
+                    filledFlagObj1 = 1
                 else:
                     obj1Status = "Needs Filling"
-                    notifyFlag = 1
+                    notifyFlagObj1 = 1
 
             if (objType == obj2):
                 obj2Cnt = objCount
                 if (objCount > obj2MaxCount):
                     obj2Status = "Over Filled"
-                    notifyFlag = 2
+                    notifyFlagObj2 = 1
                 elif (objCount >= obj2MaxCount * 70 / 100):
                     obj2Status = "Mostly Filled"
-                    filledFlag = 2
+                    filledFlagObj2 = 1
                 elif (objCount > obj2MaxCount * 30 / 100):
                     obj2Status = "Partially Filled"
-                    filledFlag = 2
+                    filledFlagObj2 = 1
                 else:
                     obj2Status = "Needs Filling"
-                    notifyFlag = 2
+                    notifyFlagObj2 = 1
 
     if productCnt == 1 :
         if (obj1Cnt == 0):
             obj1Status = "Needs Filling"
-            notifyFlag = 1
+            notifyFlagObj1 = 1
 
         shelfTable = {'shelfName': shelf_info['shelfName'],
                       'location': shelf_info['location'],
@@ -243,10 +247,10 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     if productCnt == 2 :
         if (obj1Cnt == 0):
             obj1Status = "Needs Filling"
-            notifyFlag = 1
+            notifyFlagObj1 = 1
         if (obj2Cnt == 0):
             obj2Status = "Needs Filling"
-            notifyFlag = 2
+            notifyFlagObj2 = 1
 
         shelfTable = {'shelfName': shelf_info['shelfName'],
                       'location': shelf_info['location'],
@@ -279,9 +283,9 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     local_time = time.ctime(time_sec)
     url = FRONTEND_URL + "/notify"
 
-    if (notifyFlag == 1 or notifyFlag == 2 or notifyFlag == 3) :
+    if (notifyFlagObj1 == 1 or notifyFlagObj2 == 1 or productMismatch == 1) :
 
-        if notifyFlag == 1 :
+        if notifyFlagObj1 == 1 :
             msg = "Product " + obj1 + ' ' + obj1Status + " in " + shelf_name
             status = obj1Status
 
@@ -291,9 +295,16 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
             shelfNotify = 0
             for i in range(len(listOfAlertsMsgs)):
-                if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
-                    shelfNotify = 1
-                    if (firstFrame == 0 and obj1Cnt != lastObj1Cnt):
+                if (listOfAlertsMsgs[i]['shelf'] == shelf_name) :
+                    msg = listOfAlertsMsgs[i]['msg']
+                    str = msg.split()
+                    previousObj = str[1]
+                    print ('previous obj is and  obj1:', previousObj, obj1)
+                    if (previousObj == obj1):
+                        print('[inside]previous obj is and  obj1:',
+                              previousObj, obj1)
+                        shelfNotify = 1
+                        #if (firstFrame == 0 and obj1Cnt != lastObj1Cnt):
                         listOfAlertsMsgs[i] = newdict
                         requests.post(url, json=newdict)
 
@@ -307,6 +318,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
             firstNotify = 1
             for i in range(len(listOfMsgs)):
                 if (listOfMsgs[i]['shelf'] == shelf_name):
+                    print ('last obj1 cnt', lastObj1Cnt)
+                    print ('current obj1 cnt', obj1Cnt)
                     firstNotify = 0
                     if ((firstFrame == 0 and obj1Cnt != lastObj1Cnt) ):
                         listOfMsgs.insert(0, newdict)
@@ -317,7 +330,7 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                 listOfMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
 
-        if notifyFlag == 2 :
+        if notifyFlagObj2 == 1 :
             msg = "Product " + obj2 + ' ' + obj2Status + " in " + shelf_name
             status = obj2Status
 
@@ -328,8 +341,13 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
             shelfNotify = 0
             for i in range(len(listOfAlertsMsgs)):
                 if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
-                    shelfNotify = 1
-                    if ((firstFrame == 0 and obj2Cnt != lastObj2Cnt)):
+                    msg = listOfAlertsMsgs[i]['msg']
+                    str = msg.split()
+                    previousObj = str[1]
+                    if (previousObj == obj2):
+                        print('previous obj is: obj 2 is', previousObj, obj2)
+                        shelfNotify = 1
+                        #if ((firstFrame == 0 and obj2Cnt != lastObj2Cnt)):
                         listOfAlertsMsgs[i] = newdict
                         requests.post(url, json=newdict)
 
@@ -353,9 +371,9 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                 listOfMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
 
-        if (notifyFlag == 3):
+        if (productMismatch == 1):
             status = "Product Mismatch"
-            msg = "Product are mismatched in " + shelf_name
+            msg = "Product mismatched in " + shelf_name
 
             newdict = {"msgid": COUNT, "time": local_time,
                        "notificationType": status,
@@ -365,7 +383,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
             for i in range(len(listOfAlertsMsgs)):
                 if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
                     shelfNotify = 1
-                    if ((listOfAlertsMsgs[i]['notificationType'] != status)):
+                    #if ((listOfAlertsMsgs[i]['notificationType'] != status)):
+                    if ((listOfAlertsMsgs[i]['notificationType'] == status)):
                         listOfAlertsMsgs[i] = newdict
                         requests.post(url, json=newdict)
 
@@ -390,8 +409,8 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                 requests.post(url, json=newdict)
 
 
-    if (filledFlag == 1 or filledFlag == 2) :
-        if filledFlag == 1 :
+    if (filledFlagObj1 == 1 or filledFlagObj2 == 1) :
+        if filledFlagObj1 == 1 :
             for i in range(len(listOfAlertsMsgs)):
                 if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
                     status = obj1Status
@@ -399,8 +418,18 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     newdict = {"msgid": COUNT, "time": local_time,
                                "notificationType": status,
                                "msg": msg, "shelf": shelf_name}
-                    listOfAlertsMsgs.pop(i);  ## TODO: check for pop of same shelf
-                    requests.post(url, json=newdict)
+
+                    msg = listOfAlertsMsgs[i]['msg']
+                    str = msg.split()
+                    previousObj = str[1]
+                    print ('[POP]previous obj is and  obj1:', previousObj,
+                           obj1)
+                    if ((previousObj == obj1) or (previousObj ==
+                                                  'mismatched')):
+                        listOfAlertsMsgs.pop(
+                            i);  ## TODO: check for pop of same shelf
+                        requests.post(url, json=newdict)
+
 
             if len(listOfMsgs) >= 100:
                 listOfMsgs.pop()
@@ -431,7 +460,7 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                 listOfMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
 
-        if filledFlag == 2 :
+        if filledFlagObj2 == 1 :
             for i in range(len(listOfAlertsMsgs)):
                 if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
                     status = obj2Status
@@ -440,9 +469,18 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     newdict = {"msgid": COUNT, "time": local_time,
                                "notificationType": status,
                                "msg": msg, "shelf": shelf_name}
-                    listOfAlertsMsgs.pop(
-                        i);  ## TODO: check for pop of same shelf
-                    requests.post(url, json=newdict)
+
+                    msg = listOfAlertsMsgs[i]['msg']
+                    str = msg.split()
+                    previousObj = str[1]
+                    print ('[POP]previous obj is and  obj2:', previousObj,
+                           obj2)
+                    if ((previousObj == obj2)  or (previousObj ==
+                                                  'mismatched')):
+                        listOfAlertsMsgs.pop(
+                            i);  ## TODO: check for pop of same shelf
+                        requests.post(url, json=newdict)
+
 
             if len(listOfMsgs) >= 100:
                 listOfMsgs.pop()
@@ -477,7 +515,7 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     lastObj1Cnt = obj1Cnt
     lastObj2Cnt = obj2Cnt
 
-    return notifyFlag
+    return
 
 
 def send_notification_msg(shelf_name, notifyFlag, COUNT):
