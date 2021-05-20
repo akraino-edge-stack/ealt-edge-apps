@@ -1,0 +1,1 @@
+ docker run -d --net=host -v /usr/app/model:/usr/app/model ealtedge/obj-detection -p 9998:9998

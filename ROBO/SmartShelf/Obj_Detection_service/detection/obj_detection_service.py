@@ -154,6 +154,8 @@ def Detection(img):
     bottelCount = 0
     carCount = 0
     personCount = 0
+    trainCount = 0
+    busCount = 0
     otherCount = 0
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]  # Confidence of prediction
