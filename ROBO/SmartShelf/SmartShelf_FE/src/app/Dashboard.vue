@@ -265,7 +265,6 @@ export default {
       console.log()
     },
     delProductDetail (num) {
-      console.log('delete product', num)
       let index = this.currForm.productDetails.indexOf(num)
       console.log('index', index)
       if (num !== -1) {
@@ -379,7 +378,11 @@ export default {
     },
     confirm (form) {
       robo.addShelf(this.currForm).then(response => {
-        this.showMessage('success', this.$t('Added shelf successfully'), 1500)
+        if (response.data.responce === 'failure') {
+          this.showMessage('error', this.$t('Failed to add shelf'), 1500)
+        } else {
+          this.showMessage('success', this.$t('Added shelf successfully'), 1500)
+        }
         this.getShelfListInPage()
         this.dialogVisible = false
       }).catch((error) => {

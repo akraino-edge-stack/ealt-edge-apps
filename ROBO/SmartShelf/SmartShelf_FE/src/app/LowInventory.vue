@@ -161,6 +161,7 @@ export default {
       dialogVisible: false,
       dialogVisibleLiveVideo: false,
       title: '',
+      searchData: '',
       rlp: sessionStorage.getItem('rlp')
     }
   },
@@ -171,6 +172,9 @@ export default {
     lowShelfData (val) {
       if (val.length > 0) {
         this.tableData = this.paginationData = val
+        if (this.paginationData && this.paginationData.length > 0 && this.searchData) {
+          this.filterTableData(this.searchData, 'shelfName')
+        }
         this.dataLoading = false
       }
     }
@@ -189,10 +193,14 @@ export default {
             if (key === 'shelfName') {
               dataKey = 'shelfName'
             }
+            this.searchData = data[key].toLowerCase()
             this.filterTableData(data[key].toLowerCase(), dataKey)
           }
         }
-        if (!reset) this.paginationData = this.tableData
+        if (!reset) {
+          this.paginationData = this.tableData
+          this.searchData = ''
+        }
       }
     },
     deleteCamera (cameraname) {
