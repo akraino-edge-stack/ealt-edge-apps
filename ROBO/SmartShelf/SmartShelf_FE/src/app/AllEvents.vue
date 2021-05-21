@@ -27,27 +27,24 @@
         >
           <el-table-column
             prop="notificationType"
-            width="300px"
             :label="$t('Type')"
           >
             <template slot-scope="scope">
               <div
-                class="notificationTagPartiallyFilled"
                 v-if="scope.row.notificationType === 'Partially Filled'"
               >
-                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+                <span class="notificationTagPartiallyFilled">  {{ scope.row.notificationType }} </span>
               </div>
               <div
-                class="notificationTagMostlyFilled"
                 v-else-if="scope.row.notificationType === 'Mostly Filled'"
               >
-                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+                <span class="notificationTagMostlyFilled">  {{ scope.row.notificationType }} </span>
               </div>
               <div
-                class="notificationTag"
+
                 v-else
               >
-                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+                <span class="notificationTag">  {{ scope.row.notificationType }} </span>
               </div>
 
               <div>
@@ -102,7 +99,7 @@
       <img
         class="image-src"
         :src="this.image"
-        alt=""
+        alt="image display failed"
       >
     </el-dialog>
   </div>
@@ -157,8 +154,14 @@ export default {
   },
   methods: {
     handleDetail (row) {
+      console.log('row msg id', row.msgid)
       this.getImage(row.msgid)
       this.dialogVisibleImage = true
+      if (this.image) {
+        console.log('this.image is not null', this.image)
+      } else {
+        console.log('this.image is null')
+      }
     },
     filterTableData (val, key) {
       this.paginationData = this.paginationData.filter(item => {
@@ -212,12 +215,14 @@ export default {
       console.log('get image method', msgId)
       await robo.getImage(msgId).then(response => {
         if (response.status === 200) {
+          console.log('get image status ', response.status)
           this.image = 'data:image/jpeg;base64,' + response.data.image
         }
       }).catch((error) => {
+        console.log('get image error', error)
         this.handleError(error)
       })
-      return this.image
+      console.log('get image is done')
     }
   }
 }
@@ -234,6 +239,7 @@ export default {
   padding: 10px 10px;
   .table {
     margin-top: 10px;
+    width: 100%;
   }
   .tableDiv {
     margin-top: 10px;
@@ -251,6 +257,12 @@ export default {
   padding: 10px 10px;
   .table {
     margin-top: 10px;
+    width: 100% !important;
+  }
+  .el-table__body {
+    table-layout: fixed;
+    border-collapse: separate;
+    width: 100% !important;
   }
   .el-dialog__body {
     padding: 30px 20px;
@@ -262,7 +274,8 @@ export default {
   }
 }
 .notificationTag {
-  width: 100px;
+  padding: 3px 9px;
+  width: 100%;
   background-color: #F56C6C;
   border-color: #F56C6C;
   color: white;
@@ -271,7 +284,8 @@ export default {
   font-size: small;
 }
 .notificationTagPartiallyFilled {
-  width: 100px;
+  padding: 3px 9px;
+  width: 100%;
   background-color: #e6a23c;
   border-color: #e6a23c;
   color: white;
@@ -280,7 +294,8 @@ export default {
   font-size: small;
 }
 .notificationTagMostlyFilled {
-  width: 100px;
+  padding: 3px 9px;
+  width: 100%;
   background-color: #67c23a;
   border-color: #67c23a;
   color: white;

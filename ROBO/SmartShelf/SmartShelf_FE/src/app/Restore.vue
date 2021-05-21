@@ -35,7 +35,7 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col span="24">
+        <el-col :span="24">
           <el-tabs
             v-model="activeName"
             class="tabs"

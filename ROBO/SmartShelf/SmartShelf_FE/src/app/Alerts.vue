@@ -27,27 +27,23 @@
         >
           <el-table-column
             prop="notificationType"
-            width="300px"
             :label="$t('Type')"
           >
             <template slot-scope="scope">
               <div
-                class="notificationTagPartiallyFilled"
                 v-if="scope.row.notificationType === 'Partially Filled'"
               >
-                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+                <span class="notificationTagPartiallyFilled">  {{ scope.row.notificationType }} </span>
               </div>
               <div
-                class="notificationTagMostlyFilled"
                 v-else-if="scope.row.notificationType === 'Mostly Filled'"
               >
-                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+                <span class="notificationTagMostlyFilled">  {{ scope.row.notificationType }} </span>
               </div>
               <div
-                class="notificationTag"
                 v-else
               >
-                <span style="padding: 0">  {{ scope.row.notificationType }} </span>
+                <span class="notificationTag">  {{ scope.row.notificationType }} </span>
               </div>
 
               <div>
@@ -262,7 +258,8 @@ export default {
   }
 }
 .notificationTag {
-  width: 100px;
+  padding: 3px 9px;
+  width: 100%;
   background-color: #F56C6C;
   border-color: #F56C6C;
   color: white;
@@ -271,7 +268,8 @@ export default {
   font-size: small;
 }
 .notificationTagPartiallyFilled {
-  width: 100px;
+  padding: 3px 9px;
+  width: 100%;
   background-color: #e6a23c;
   border-color: #e6a23c;
   color: white;
@@ -280,7 +278,8 @@ export default {
   font-size: small;
 }
 .notificationTagMostlyFilled {
-  width: 100px;
+  padding: 3px 9px;
+  width: 100%;
   background-color: #67c23a;
   border-color: #67c23a;
   color: white;

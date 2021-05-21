@@ -91,6 +91,7 @@ export default {
       alertMessages: [],
       dataLoading: true,
       dialogVisibleImage: false,
+      searchData: '',
       rlp: sessionStorage.getItem('rlp')
     }
   },
@@ -115,8 +116,25 @@ export default {
       this.getImage(row.msgid)
       this.dialogVisibleImage = true
     },
-    filterTableData (val, key) {
+    filterAlertTableData (val, key, alertMsgs) {
       console.log('filtertable data', val, key)
+      if (alertMsgs) {
+        this.alertMessages = alertMsgs.filter(item => {
+          let itemVal = item[key]
+          if (itemVal) return itemVal.toLowerCase().indexOf(val) > -1
+        })
+      }
+    },
+    filterAllTableData (val, key, allMsgs) {
+      console.log('filtertable data', val, key)
+      if (allMsgs) {
+        this.allMessages = allMsgs.filter(item => {
+          let itemVal = item[key]
+          if (itemVal) return itemVal.toLowerCase().indexOf(val) > -1
+        })
+      }
+    },
+    filterTableData (val, key) {
       this.alertMessages = this.alertMessages.filter(item => {
         let itemVal = item[key]
         console.log(itemVal)
@@ -135,7 +153,15 @@ export default {
     },
     getShelfNotificationListInPage () {
       robo.getShelfNotificationList().then(response => {
-        this.allMessages = response.data.Notifications
+        let allMsgs
+        allMsgs = response.data.Notifications
+        if (allMsgs && allMsgs.length > 0 && this.searchData) {
+          console.log('search data is ', this.searchData)
+          this.filterAllTableData(this.searchData, 'msg', allMsgs)
+        } else {
+          console.log('no search data')
+          this.allMessages = allMsgs
+        }
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false
@@ -148,7 +174,13 @@ export default {
     },
     getShelfAlertNotificationListInPage () {
       robo.getShelfAlertNotificationList().then(response => {
-        this.alertMessages = response.data.Notifications
+        let alertMsgs
+        alertMsgs = response.data.Notifications
+        if (alertMsgs && alertMsgs.length > 0 && this.searchData) {
+          this.filterAlertTableData(this.searchData, 'msg', alertMsgs)
+        } else {
+          this.alertMessages = alertMsgs
+        }
         this.dataLoading = false
       }).catch((error) => {
         this.dataLoading = false
@@ -160,7 +192,6 @@ export default {
       })
     },
     getSearchData (data) {
-      this.paginationData = this.tableData
       let reset = false
       if (this.allMessages && this.allMessages.length > 0) {
         for (let key in data) {
@@ -170,12 +201,14 @@ export default {
             if (key === 'shelfName') {
               dataKey = 'msg'
             }
+            this.searchData = data[key].toLowerCase()
             this.filterTableData(data[key].toLowerCase(), dataKey)
           }
         }
       }
       if (!reset) {
         console.log('reset is false')
+        this.searchData = ''
         this.getShelfNotificationListInPage()
         this.getShelfAlertNotificationListInPage()
       }

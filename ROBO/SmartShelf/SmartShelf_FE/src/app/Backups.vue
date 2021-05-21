@@ -203,7 +203,6 @@ export default {
   },
   methods: {
     confirm (form) {
-      console.log('confirm form', form)
       robo.createBackup(this.currForm).then(response => {
         this.showMessage('success', this.$t('Backup Created'), 1500)
         this.timer = setTimeout(() => { this.getBackupListInPage() }, 3000)
@@ -231,7 +230,6 @@ export default {
       }
     },
     backup () {
-      console.log('create backup')
       this.title = this.$t('Create Backup')
       this.dialogVisible = true
       this.resetForm()
