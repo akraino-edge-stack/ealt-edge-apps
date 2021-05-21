@@ -82,7 +82,7 @@
       </el-row>
       <div class="pageBar2">
         <pagination
-          :page-sizes="[5,10,15,20]"
+          :page-sizes="[7,14,21,28]"
           :table-data="paginationData"
           @getCurrentPageData="getCurrentPageData"
         />

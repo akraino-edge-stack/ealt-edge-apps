@@ -201,7 +201,7 @@
             >
               <em class="el-icon-upload" />
               <div class="el-upload__text">
-                {{ $t('system.edgeNodes.howToUpload') }}
+                {{ $t('Drag the file here，or click to upload') }}
               </div>
             </el-upload>
           </el-dialog>

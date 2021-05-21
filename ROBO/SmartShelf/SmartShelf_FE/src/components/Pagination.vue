@@ -45,7 +45,7 @@ export default {
   },
   data () {
     return {
-      pageSize: 5,
+      pageSize: 7,
       totalNum: 0,
       currentPage: 1,
       data: []

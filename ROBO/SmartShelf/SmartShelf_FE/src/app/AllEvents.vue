@@ -83,7 +83,7 @@
       </el-row>
       <div class="pageBar2">
         <pagination
-          :page-sizes="[5,10,15,20]"
+          :page-sizes="[7,14,21,28]"
           :table-data="paginationData"
           @getCurrentPageData="getCurrentPageData"
         />
@@ -157,11 +157,6 @@ export default {
       console.log('row msg id', row.msgid)
       this.getImage(row.msgid)
       this.dialogVisibleImage = true
-      if (this.image) {
-        console.log('this.image is not null', this.image)
-      } else {
-        console.log('this.image is null')
-      }
     },
     filterTableData (val, key) {
       this.paginationData = this.paginationData.filter(item => {
@@ -222,7 +217,6 @@ export default {
         console.log('get image error', error)
         this.handleError(error)
       })
-      console.log('get image is done')
     }
   }
 }
