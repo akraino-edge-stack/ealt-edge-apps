@@ -42,7 +42,7 @@ ssl_server_name = os.environ.get('SERVER_NAME', "ealtedge")
 api_gateway = os.environ.get("API_GATEWAY", "apigw.mep.org")
 # Obj_Det_SER_IP = os.environ.get("OBJ_DET_SER_IP", "localhost")
 
-Obj_Det_SER_IP = os.environ.get("OBJ_DET_SER_IP", '0.0.0.0')
+Obj_Det_SER_IP = os.environ.get("OBJ_DET_SER_IP", 'obj-detection')
 # Obj_Det_SER_IP = os.environ.get("OBJ_DET_SER_IP")
 Obj_Det_SER_PORT = os.environ.get("OBJ_DET_SER_PORT", '9998')
 # Obj_Det_SER_PORT = os.environ.get("OBJ_DET_SER_PORT")
@@ -53,4 +53,4 @@ Obj_Det = os.environ.get("OBJ_DETECTION", "mep/v1/obj_detection")
 detection_url = "http://" + Obj_Det_SER_IP + ":" + Obj_Det_SER_PORT + "/" + \
                                            Obj_Det + "/"
 #FE_SERVICE = os.environ.get("FE_SERVICE", "shelf-proxy-service:5000")
-FE_SERVICE = os.environ.get("FE_SERVICE", "localhost:5000")
+FE_SERVICE = os.environ.get("FE_SERVICE", "node-proxy:5000")
