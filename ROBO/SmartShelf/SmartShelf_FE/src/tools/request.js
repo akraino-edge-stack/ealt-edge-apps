@@ -18,9 +18,10 @@ import axios from 'axios'
 import 'element-ui/lib/theme-chalk/index.css'
 
 let api = 'http://localhost'
+let api = 'http://' + window.location.href.split('//')[1].split(':')[0]
 let backupApi = 'http://localhost'
 let roboApi = backupApi + ':30081' + '/v1/robo'
-let shelfApi = api + ':9995' + '/v1/shelf'
+let shelfApi = api + ':30995' + '/v1/shelf'
 
 axios.interceptors.response.use(
   function (response) {
