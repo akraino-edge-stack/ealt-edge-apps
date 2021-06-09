@@ -156,6 +156,7 @@ def Detection(img):
     personCount = 0
     trainCount = 0
     busCount = 0
+    birdCount = 0
     otherCount = 0
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]  # Confidence of prediction
@@ -202,6 +203,8 @@ def Detection(img):
                     trainCount = trainCount + 1
                 elif ('bus' in label):
                     busCount = busCount + 1
+                elif ('bird' in label):
+                    birdCount = birdCount + 1
                 else:
                     otherCount = otherCount + 1
 

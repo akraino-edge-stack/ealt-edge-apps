@@ -57,10 +57,11 @@ lastObj1Cnt = 0
 lastObj2Cnt = 0
 firstFrame = 1
 
+DictDetectionStatus = {}
 HTTP_URL = "http://"
 HTTPS_URL = "https://"
 FRONTEND_URL = HTTP_URL + config.FE_SERVICE
-
+DicMisMatchStatus = {}
 
 class VideoCamera(object):
     """
@@ -110,6 +111,9 @@ def video(video_capture, shelf_info, TableIndex):
     app.logger.info("local video")
     process_this_frame = 0
     count = 0
+    key = shelf_info['shelfName'] + shelf_info['location']
+    print('[video]Deletion key is', key)
+
     while True:
         success, frame = video_capture.get_frame()
         if count == 5:
@@ -118,6 +122,10 @@ def video(video_capture, shelf_info, TableIndex):
             video_capture.reset_frame()
             count = count + 1
             continue
+
+        if DictDetectionStatus[key] == 0 :
+            print('[video]Deletion is triggered')
+            return
 
         if process_this_frame == 0:
             thread_1 = threading.Thread(target=shelf_inventory, args=(frame, shelf_info,TableIndex))
@@ -147,6 +155,9 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     filledFlagObj2 = 0
     notifyFlagObj2 = 0
     productMismatch = 0
+    disableProductMismatch = 1
+
+    key = shelf_info['shelfName'] + shelf_info['location']
 
     productCnt = len(shelf_info['productDetails'])
     if productCnt == 1:
@@ -382,32 +393,35 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
             shelfNotify = 0
             for i in range(len(listOfAlertsMsgs)):
                 if (listOfAlertsMsgs[i]['shelf'] == shelf_name):
-                    shelfNotify = 1
                     #if ((listOfAlertsMsgs[i]['notificationType'] != status)):
                     if ((listOfAlertsMsgs[i]['notificationType'] == status)):
+                        shelfNotify = 1
                         listOfAlertsMsgs[i] = newdict
                         requests.post(url, json=newdict)
+                        break
 
             if (shelfNotify == 0):
                 listOfAlertsMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
 
-            if len(listOfMsgs) >= 100:
-                listOfMsgs.pop()
+            if DicMisMatchStatus[key] == 1 :
 
-            firstNotify = 1
-            for i in range(len(listOfMsgs)):
-                if (listOfMsgs[i]['shelf'] == shelf_name):
-                    firstNotify = 0
-                    if ((listOfMsgs[i]['notificationType'] != status)):
-                        listOfMsgs.insert(0, newdict)
-                        requests.post(url, json=newdict)
-                    break
-
-            if firstNotify == 1:
+                DicMisMatchStatus[key] = 0
+                if len(listOfMsgs) >= 100:
+                    listOfMsgs.pop()
+                '''
+                firstNotify = 1
+                for i in range(len(listOfMsgs)):
+                    if (listOfMsgs[i]['shelf'] == shelf_name):
+                        firstNotify = 0
+                        if ((listOfMsgs[i]['notificationType'] != status)):
+                            listOfMsgs.insert(0, newdict)
+                            requests.post(url, json=newdict)
+                        break
+                '''
+               # if firstNotify == 1:
                 listOfMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
-
 
     if (filledFlagObj1 == 1 or filledFlagObj2 == 1) :
         if filledFlagObj1 == 1 :
@@ -510,6 +524,9 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                            "msg": msg, "shelf": shelf_name}
                 listOfMsgs.insert(0, newdict)
                 requests.post(url, json=newdict)
+
+    if productMismatch == 0 :
+        DicMisMatchStatus[key] == 1
 
     firstFrame = 0
     lastObj1Cnt = obj1Cnt
@@ -816,6 +833,14 @@ def add_shelf():
     global TableIndex
     print ('print index for shelf', TableIndex)
 
+    key = shelf_details['shelfName'] + shelf_details['location']
+    print('[Add shelf]Deletion key is', key)
+    DictDetectionStatus[key] = 1
+    print("[DETECTION]Detection status:")
+    print(DictDetectionStatus)
+
+    ## product mismatch in case product is removed
+    DicMisMatchStatus[key] = 1
     if "mp4" in shelf_details["rtspUrl"]:
         video_file = VideoFile(shelf_details['rtspUrl'])
         # video_dict = {camera_info["name"]: video_file}
@@ -847,6 +872,35 @@ def play_video(shelfname):
             videoPath = app.config['VIDEO_PATH'] + ShelfInfo['rtspUrl']
             return Response(FileWrapper(open(videoPath, 'rb')),
                             mimetype='video/mp4')
+
+
+@app.route('/v1/shelf/shelfname/<shelfname>/location/<location>', methods=['DELETE'])
+def delete_shelf(shelfname, location):
+    shelf_details = request.json
+    app.logger.info("Received message from ClientIP [" + request.remote_addr
+                    + "] Operation [" + request.method + "]" +
+                    " Resource [" + request.url + "]")
+    #productCnt = len(shelf_details['productDetails'])
+    # print('total products are=',productCnt)
+
+    for i in range(len(listOfShelf)) :
+        if ((listOfShelf[i]['shelfName'] == shelfname)
+            and (listOfShelf[i]['location'] == location)) :
+            listOfShelf.pop(i)
+
+            key = shelfname + location
+            print('Deletion key is', key)
+            DictDetectionStatus[key] = 0
+            print("[DETECTION]Detection status:")
+            print(DictDetectionStatus)
+
+            msg = {"responce": "success"}
+            return jsonify(msg)
+
+    msg = {"responce": "failure"}
+    print("shel not exist")
+
+    return jsonify(msg)
 
 
 @app.route('/v1/shelf/table', methods=['GET'])

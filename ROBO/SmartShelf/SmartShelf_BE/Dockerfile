@@ -72,9 +72,11 @@ RUN apt-get install -y --fix-missing \
 WORKDIR $APP_HOME
 
 # Copy the application & scripts
-COPY config.py requirements.txt run.py $APP_HOME/
+COPY crequirements.txt $APP_HOME/
 # Install requirements
 RUN pip install -r requirements.txt
+
+COPY config.py run.py $APP_HOME/
 
 COPY inventry $APP_HOME/inventry/
 
