@@ -80,5 +80,6 @@ Step 7: Post setup, cleanup velero
     3. kubectl delete crds -l component=velero
 
 
-
+UI URL:
+http://VMIP/30997/
 
