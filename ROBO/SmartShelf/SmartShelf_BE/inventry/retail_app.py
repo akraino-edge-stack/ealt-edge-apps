@@ -56,6 +56,7 @@ listOfObj = ['Bottle', 'ToyCar', 'ToyTrain', 'ToyBus']
 lastObj1Cnt = 0
 lastObj2Cnt = 0
 firstFrame = 1
+listOfTableIndex = {}
 
 DictDetectionStatus = {}
 HTTP_URL = "http://"
@@ -839,6 +840,7 @@ def add_shelf():
     print("[DETECTION]Detection status:")
     print(DictDetectionStatus)
 
+    listOfTableIndex[key] = TableIndex
     ## product mismatch in case product is removed
     DicMisMatchStatus[key] = 1
     if "mp4" in shelf_details["rtspUrl"]:
@@ -887,12 +889,19 @@ def delete_shelf(shelfname, location):
         if ((listOfShelf[i]['shelfName'] == shelfname)
             and (listOfShelf[i]['location'] == location)) :
             listOfShelf.pop(i)
-
             key = shelfname + location
             print('Deletion key is', key)
             DictDetectionStatus[key] = 0
             print("[DETECTION]Detection status:")
             print(DictDetectionStatus)
+
+            Tableindex = listOfTableIndex[key]
+            print("[Delete]Global Table index is:", Tableindex)
+
+            print("[Delete]list of shelf table before:", listOfShelfTables)
+
+            listOfShelfTables.pop(Tableindex)
+            print("[Delete]list of shelf table after:", listOfShelfTables)
 
             msg = {"responce": "success"}
             return jsonify(msg)
