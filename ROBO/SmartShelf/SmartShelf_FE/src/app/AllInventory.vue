@@ -100,6 +100,15 @@
               >
                 {{ $t('Live video') }}
               </el-button>
+
+              <el-button
+                  id="deleteButton"
+                  @click.native.prevent="showDeleteWarning(scope.row)"
+                  type="text"
+                  size="small"
+              >
+                {{ $t('Delete') }}
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -127,7 +136,7 @@
 </template>
 
 <script>
-import { shelfApi } from '../tools/request.js'
+import { robo } from '../tools/request.js'
 import pagination from '../components/Pagination.vue'
 import Camerapannel from './image.vue'
 import Search from '../components/Search2.vue'
@@ -213,6 +222,26 @@ export default {
         src: shelfApi + '/video/' + row.shelfName
       }
       this.dialogVisibleLiveVideo = true
+    },
+    showDeleteWarning (row) {
+      console.log('show delete warning')
+      this.$confirm('Are you sure, you want to delete this Shelf?', 'Warning', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        closeOnClickModal: false,
+        showClose: false,
+        type: 'warning'
+      }).then(() => {
+        this.deleteShelf(row)
+      }).catch(() => {
+      })
+    },
+    deleteShelf (row) {
+      robo.deleteShelf(row.shelfName, row.location).then(res => {
+        this.getShelfList()
+      }).catch(err => {
+        console.log(err)
+      })
     },
     filterTableData (val, key) {
       this.paginationData = this.paginationData.filter(item => {

@@ -20,7 +20,7 @@
       <el-col :span="16">
         <div class="sysk8s">
           <el-row>
-            <el-col :span="16">
+            <el-col :span="18">
               <h1
                 style="font-weight: 600;
                    margin-bottom: 10px;"
@@ -28,29 +28,31 @@
                 {{ $t('Shelf Management') }}
               </h1>
             </el-col>
-            <el-col :span="8">
-              <p
-                class="btn-add"
-              >
-                <el-button
-                  id="addShelf"
-                  type="primary"
-                  @click="addShelf()"
+            <el-col :span="6">
+              <div style="float: right">
+                <p
+                    class="btn-add"
                 >
-                  {{ $t('Add shelf') }}
-                </el-button>
-              </p>
-              <p
-                class="btn-add"
-              >
-                <el-button
-                  id="uploadVideo"
-                  type="primary"
-                  @click="uploadFile()"
+                  <el-button
+                      id="addShelf"
+                      type="primary"
+                      @click="addShelf()"
+                  >
+                    {{ $t('Add shelf') }}
+                  </el-button>
+                </p>
+                <p
+                    class="btn-add"
                 >
-                  {{ $t('Upload video') }}
-                </el-button>
-              </p>
+                  <el-button
+                      id="uploadVideo"
+                      type="primary"
+                      @click="uploadFile()"
+                  >
+                    {{ $t('Upload video') }}
+                  </el-button>
+                </p>
+              </div>
             </el-col>
           </el-row>
           <el-row>

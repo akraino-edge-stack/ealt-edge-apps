@@ -72,7 +72,7 @@ RUN apt-get install -y --fix-missing \
 WORKDIR $APP_HOME
 
 # Copy the application & scripts
-COPY crequirements.txt $APP_HOME/
+COPY requirements.txt $APP_HOME/
 # Install requirements
 RUN pip install -r requirements.txt
 
