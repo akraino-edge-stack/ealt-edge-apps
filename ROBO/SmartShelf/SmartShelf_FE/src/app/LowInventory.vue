@@ -189,6 +189,9 @@ export default {
           this.filterTableData(this.searchData, 'shelfName')
         }
         this.dataLoading = false
+      } else { 
+        this.tableData = []
+        this.paginationData = []
       }
     }
   },

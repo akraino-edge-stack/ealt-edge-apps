@@ -185,6 +185,9 @@ export default {
           this.filterTableData(this.searchData, 'shelfName')
         }
         this.dataLoading = false
+      } else { 
+        this.tableData = []
+        this.paginationData = []
       }
     }
   },
@@ -211,9 +214,6 @@ export default {
           this.searchData = ''
         }
       }
-    },
-    deleteCamera (cameraname) {
-      console.log()
     },
     handleLiveVideo (row) {
       let tmp = [...this.dialogVisibleLiveVideo]
