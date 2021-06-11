@@ -93,12 +93,13 @@
       :close-on-click-modal="false"
       :title="$t('Latest Customer Action')"
       :visible.sync="dialogVisibleImage"
-      width="55%"
+      width="50%"
     >
       <img
         class="image-src"
         :src="this.image"
         alt=""
+        style="width: 100%;padding: 20px 20px;"
       >
     </el-dialog>
   </div>
