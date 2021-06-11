@@ -63,7 +63,7 @@ validate_file_exists() {
 
 
 
-echo "Running Monitoring Service"
+echo "Running Obj Detection Service"
 umask 0027
 cd /usr/app || exit
 python run.py

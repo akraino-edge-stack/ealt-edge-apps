@@ -57,6 +57,7 @@ lastObj1Cnt = 0
 lastObj2Cnt = 0
 firstFrame = 1
 listOfTableIndex = {}
+listOfObjStatus = {}
 
 DictDetectionStatus = {}
 HTTP_URL = "http://"
@@ -114,6 +115,7 @@ def video(video_capture, shelf_info, TableIndex):
     count = 0
     key = shelf_info['shelfName'] + shelf_info['location']
     print('[video]Deletion key is', key)
+    time.sleep(1.1)
 
     while True:
         success, frame = video_capture.get_frame()
@@ -122,6 +124,7 @@ def video(video_capture, shelf_info, TableIndex):
         if not success:
             video_capture.reset_frame()
             count = count + 1
+            time.sleep(.4)
             continue
 
         if DictDetectionStatus[key] == 0 :
@@ -131,16 +134,16 @@ def video(video_capture, shelf_info, TableIndex):
         if process_this_frame == 0:
             thread_1 = threading.Thread(target=shelf_inventory, args=(frame, shelf_info,TableIndex))
             thread_1.start()
-            thread_1.join(3)
+            thread_1.join(1)
 
         count = 0
         process_this_frame = process_this_frame + 1
-        if process_this_frame == 20:
+        if process_this_frame == 10:
             process_this_frame = 0
 
         # _, _ = cv2.imencode('.jpg', frame)
         #time.sleep(.01)
-        time.sleep(.02)
+        time.sleep(.017)
     return 'SampleString'
 
 
@@ -148,9 +151,12 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
     obj1Cnt = 0
     obj2Cnt = 0
-    global lastObj1Cnt
-    global lastObj2Cnt
-    global firstFrame
+    shelf = shelf_info['shelfName']
+    ObjStatus = listOfObjStatus[shelf]
+    lastObj1Cnt = ObjStatus["lastObj1Cnt"]
+    lastObj2Cnt = ObjStatus["lastObj2Cnt"]
+    firstFrame = ObjStatus["FirstFrame"]
+
     filledFlagObj1 = 0
     notifyFlagObj1 = 0
     filledFlagObj2 = 0
@@ -286,10 +292,37 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
     #print (shelfTable)
     #print (TableIndex)
-    if len(listOfShelfTables) > TableIndex :
-        listOfShelfTables[TableIndex] = shelfTable
-    else :
-        listOfShelfTables.insert(TableIndex, shelfTable)
+
+    if DictDetectionStatus[key] == 0:
+        print('[video]Deletion is triggered')
+        return
+
+    #print ('[Parsing] table index ', TableIndex)
+    #print ('[Parsing] shelf table before ', listOfShelfTables)
+    #if len(listOfShelfTables) > TableIndex :
+     #   listOfShelfTables[TableIndex] = shelfTable
+    #else :
+     #   listOfShelfTables.insert(TableIndex, shelfTable)
+
+    ShelfExist = 0
+
+
+    for i in range(len(listOfShelfTables)) :
+        #print('[parsing] shelf anme', listOfShelfTables[i]['shelfName'])
+        #print('[parsing] shelf anme', shelf_info['shelfName'])
+        #print('parsing, index', i)
+        if listOfShelfTables[i]['shelfName'] == shelf_info['shelfName'] :
+            #print("[parsing] inside")
+            #listOfShelfTables.insert(i, shelfTable)
+            listOfShelfTables[i] = shelfTable
+            ShelfExist = 1
+            break
+
+    if ShelfExist == 0 :
+        listOfShelfTables.append(shelfTable)
+
+
+    #print ('[Parsing] shelf table after ', listOfShelfTables)
 
     time_sec = time.time()
     local_time = time.ctime(time_sec)
@@ -333,7 +366,7 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
                     print ('last obj1 cnt', lastObj1Cnt)
                     print ('current obj1 cnt', obj1Cnt)
                     firstNotify = 0
-                    if ((firstFrame == 0 and obj1Cnt != lastObj1Cnt) ):
+                    if ((firstFrame == 0 and obj1Cnt != lastObj1Cnt)):
                         listOfMsgs.insert(0, newdict)
                         requests.post(url, json=newdict)
                     break
@@ -529,10 +562,12 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     if productMismatch == 0 :
         DicMisMatchStatus[key] == 1
 
-    firstFrame = 0
-    lastObj1Cnt = obj1Cnt
-    lastObj2Cnt = obj2Cnt
-
+    ObjStatus["lastObj1Cnt"] = obj1Cnt
+    ObjStatus["lastObj2Cnt"] = obj2Cnt
+    ObjStatus["FirstFrame"] = 0
+    lastObj1Type = obj1
+    if productCnt == 2 :
+        lastObj2Type = obj2
     return
 
 
@@ -843,6 +878,13 @@ def add_shelf():
     listOfTableIndex[key] = TableIndex
     ## product mismatch in case product is removed
     DicMisMatchStatus[key] = 1
+
+    ## Add shelf Obj status dict
+    shelf = shelf_details['shelfName']
+    listOfObjStatus[shelf] = {'lastObj1Cnt' : 0,
+                              'lastObj2Cnt' : 0,
+                              'FirstFrame': 1}
+
     if "mp4" in shelf_details["rtspUrl"]:
         video_file = VideoFile(shelf_details['rtspUrl'])
         # video_dict = {camera_info["name"]: video_file}
@@ -851,7 +893,7 @@ def add_shelf():
                                     args=(video_file,
                                           shelf_info,TableIndex,))
         thread_2.start()
-        thread_2.join(3)
+        thread_2.join(1)
 
         TableIndex = TableIndex + 1
         print ('thread is over')
@@ -884,6 +926,7 @@ def delete_shelf(shelfname, location):
                     " Resource [" + request.url + "]")
     #productCnt = len(shelf_details['productDetails'])
     # print('total products are=',productCnt)
+    global TableIndex
 
     for i in range(len(listOfShelf)) :
         if ((listOfShelf[i]['shelfName'] == shelfname)
@@ -895,16 +938,30 @@ def delete_shelf(shelfname, location):
             print("[DETECTION]Detection status:")
             print(DictDetectionStatus)
 
+            '''
             Tableindex = listOfTableIndex[key]
             print("[Delete]Global Table index is:", Tableindex)
 
             print("[Delete]list of shelf table before:", listOfShelfTables)
 
             listOfShelfTables.pop(Tableindex)
+            TableIndex = TableIndex - 1
             print("[Delete]list of shelf table after:", listOfShelfTables)
+            '''
+            break
+
+    if shelfname in listOfObjStatus :
+        del listOfObjStatus[shelfname]
+
+    for i in range(len(listOfShelfTables)) :
+        if listOfShelfTables[i]['shelfName'] == shelfname :
+            #listOfShelfTables.insert(i, shelfTable)
+            listOfShelfTables.pop(i)
 
             msg = {"responce": "success"}
             return jsonify(msg)
+
+
 
     msg = {"responce": "failure"}
     print("shel not exist")
