@@ -151,11 +151,18 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
 
     obj1Cnt = 0
     obj2Cnt = 0
+
+    key = shelf_info['shelfName'] + shelf_info['location']
+    if DictDetectionStatus[key] == 0:
+        print('[video]Deletion is triggered')
+        return
+
     shelf = shelf_info['shelfName']
-    ObjStatus = listOfObjStatus[shelf]
-    lastObj1Cnt = ObjStatus["lastObj1Cnt"]
-    lastObj2Cnt = ObjStatus["lastObj2Cnt"]
-    firstFrame = ObjStatus["FirstFrame"]
+    if shelf in listOfObjStatus :
+        ObjStatus = listOfObjStatus[shelf]
+        lastObj1Cnt = ObjStatus["lastObj1Cnt"]
+        lastObj2Cnt = ObjStatus["lastObj2Cnt"]
+        firstFrame = ObjStatus["FirstFrame"]
 
     filledFlagObj1 = 0
     notifyFlagObj1 = 0
@@ -163,8 +170,6 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
     notifyFlagObj2 = 0
     productMismatch = 0
     disableProductMismatch = 1
-
-    key = shelf_info['shelfName'] + shelf_info['location']
 
     productCnt = len(shelf_info['productDetails'])
     if productCnt == 1:
@@ -953,6 +958,21 @@ def delete_shelf(shelfname, location):
     if shelfname in listOfObjStatus :
         del listOfObjStatus[shelfname]
 
+    j = 0
+    while j < 2 :
+        j = j+1
+        for i in range(len(listOfAlertsMsgs)):
+            print('[Delet]index is', i)
+            if (listOfAlertsMsgs[i]['shelf'] == shelfname):
+                listOfAlertsMsgs.pop(i)
+                break
+
+    newdict = {"msgid": 0, "time": 0,
+               "notificationType": 'null',
+               "msg": 'null', "shelf": 'null'}
+
+    url = FRONTEND_URL + "/notify"
+    requests.post(url, json=newdict)
     for i in range(len(listOfShelfTables)) :
         if listOfShelfTables[i]['shelfName'] == shelfname :
             #listOfShelfTables.insert(i, shelfTable)
