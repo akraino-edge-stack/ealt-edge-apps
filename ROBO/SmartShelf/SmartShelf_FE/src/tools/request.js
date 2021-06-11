@@ -18,8 +18,8 @@ import axios from 'axios'
 import 'element-ui/lib/theme-chalk/index.css'
 
 let api = 'http://' + window.location.href.split('//')[1].split(':')[0]
-let backupApi = 'http://localhost'
-let roboApi = backupApi + ':30081' + '/v1/robo'
+let backupApi = 'http://' + window.location.href.split('//')[1].split(':')[0]
+let roboApi = backupApi + ':30996' + '/v1/robo'
 let shelfApi = api + ':30995' + '/v1/shelf'
 
 axios.interceptors.response.use(
@@ -100,6 +100,9 @@ let robo = {
   },
   getImage (msgId) {
     return GET(shelfApi + '/image/' + msgId)
+  },
+  deleteShelf(shelfName, location) {
+    return DELETE(shelfApi + '/shelfname/' + shelfName + '/location/' +  location)
   }
 }
 

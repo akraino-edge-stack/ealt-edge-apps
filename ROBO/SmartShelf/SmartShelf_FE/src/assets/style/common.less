@@ -188,6 +188,9 @@ body .el-table th.gutter{
 .area-select>.area-selected-trigger{
   padding-top:0px !important;
 }
+.el-table td {
+  vertical-align: top;
+}
 
 .tabs {
   .el-tabs__header {
@@ -232,6 +235,17 @@ body .el-table th.gutter{
     display: flex;
     justify-content: center;
   }
+}
+
+.el-table td {
+  padding: 12px 0;
+  min-width: 0;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  vertical-align: top !important; 
+  position: relative;
+  text-align: left;
 }
 
 .search .el-input__inner{

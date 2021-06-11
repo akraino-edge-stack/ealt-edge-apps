@@ -103,7 +103,8 @@ export default {
   },
   created () {
     // Client receives the message:
-    const socket = io.connect('http://localhost:5000/')
+    const baseUrl = 'http://' + window.location.href.split('//')[1].split(':')[0]
+    const socket = io.connect(baseUrl + ':30999/')
     socket.on('notify', (data) => {
       this.getShelfNotificationListInPage()
       this.getShelfAlertNotificationListInPage()
@@ -159,7 +160,7 @@ export default {
           console.log('search data is ', this.searchData)
           this.filterAllTableData(this.searchData, 'msg', allMsgs)
         } else {
-          console.log('no search data')
+          // console.log('no search data')
           this.allMessages = allMsgs
         }
         this.dataLoading = false

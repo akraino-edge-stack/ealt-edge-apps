@@ -37,7 +37,7 @@
             prop="shelfName"
             sortable
             :label="$t('Shelf Name')"
-            width="130px"
+            width="150px"
             header-align="center"
             align="center"
           >
@@ -48,7 +48,7 @@
           <el-table-column
             prop="location"
             :label="$t('Location')"
-            width="120px"
+            width="150px"
             header-align="center"
             align="center"
           />
@@ -83,22 +83,45 @@
                   <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
                 </div>
               </span>
+              <div v-show="dialogVisibleLiveVideo[scope.row.shelfName]" style="width: 50%; margin:auto; ">
+                <Camerapannel
+                  :data=scope.row.shelfName
+                />
+              </div>
             </template>
           </el-table-column>
           <el-table-column
             :label="$t('common.operation')"
-            width="120px"
+            width="180px"
             header-align="center"
             align="center"
           >
             <template slot-scope="scope">
               <el-button
+                id="hideVideo"
+                @click.native.prevent="handleHideVideo(scope.row)"
+                type="text"
+                size="small"
+                v-if=dialogVisibleLiveVideo[scope.row.shelfName]
+              >
+                {{ $t('Hide video') }}
+              </el-button>
+              <el-button
                 id="liveVideo"
                 @click.native.prevent="handleLiveVideo(scope.row)"
                 type="text"
                 size="small"
+                v-else
               >
                 {{ $t('Live video') }}
+              </el-button>
+              <el-button
+                  id="deleteButton"
+                  @click.native.prevent="showDeleteWarning(scope.row)"
+                  type="text"
+                  size="small"
+              >
+                {{ $t('Delete') }}
               </el-button>
             </template>
           </el-table-column>
@@ -112,38 +135,25 @@
         />
       </div>
     </div>
-    <el-dialog
-      :close-on-click-modal="false"
-      :title="$t('Live video')"
-      :visible.sync="dialogVisibleLiveVideo"
-      width="50%"
-    >
-      <Camerapannel
-        :delcamera="deleteCamera"
-        :data="liveVideo"
-      />
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { shelfApi } from '../tools/request.js'
+import { robo } from '../tools/request.js'
 import pagination from '../components/Pagination.vue'
 import Camerapannel from './image.vue'
 import Search from '../components/Search2.vue'
 export default {
   name: 'AllInventory',
   props: {
-    getShelfList:
-        {
-          type: Function,
-          required: true
-        },
-    shelfData:
-        {
-          type: Array,
-          required: true
-        }
+    getShelfList: {
+      type: Function,
+      required: true
+    },
+    shelfData: {
+      type: Array,
+      required: true
+    }
   },
   components: {
     pagination,
@@ -152,14 +162,13 @@ export default {
   },
   data () {
     return {
-      liveVideo: {},
       flvPlayer: null,
       paginationData: [],
       currPageTableData: [],
       dataLoading: false,
       tableData: [],
       dialogVisible: false,
-      dialogVisibleLiveVideo: false,
+      dialogVisibleLiveVideo: [],
       title: '',
       searchData: '',
       rlp: sessionStorage.getItem('rlp')
@@ -207,12 +216,36 @@ export default {
       console.log()
     },
     handleLiveVideo (row) {
-      this.liveVideo = {
-        name: row.shelfName,
-        type: 'video/mp4',
-        src: shelfApi + '/video/' + row.shelfName
-      }
-      this.dialogVisibleLiveVideo = true
+      let tmp = [...this.dialogVisibleLiveVideo]
+      tmp[row.shelfName] = true
+      this.dialogVisibleLiveVideo = tmp
+      console.log(this.dialogVisibleLiveVideo)
+    },
+    handleHideVideo (row) {
+      let tmp = [...this.dialogVisibleLiveVideo]
+      tmp[row.shelfName] = false
+      this.dialogVisibleLiveVideo = tmp
+      console.log(this.dialogVisibleLiveVideo)
+    },
+    showDeleteWarning (row) {
+      console.log('show delete warning')
+      this.$confirm('Are you sure, you want to delete this Shelf?', 'Warning', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        closeOnClickModal: false,
+        showClose: false,
+        type: 'warning'
+      }).then(() => {
+        this.deleteShelf(row)
+      }).catch(() => {
+      })
+    },
+    deleteShelf (row) {
+      robo.deleteShelf(row.shelfName, row.location).then(res => {
+        this.getShelfList()
+      }).catch(err => {
+        console.log(err)
+      })
     },
     filterTableData (val, key) {
       this.paginationData = this.paginationData.filter(item => {
@@ -252,12 +285,8 @@ export default {
   background: #fff;
   padding: 10px 10px;
   .table {
-    margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
-  }
-  .tableDiv {
-    margin-top: 10px;
   }
   .btn-add {
     height: 40px;
