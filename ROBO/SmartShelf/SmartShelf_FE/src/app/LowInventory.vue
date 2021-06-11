@@ -83,11 +83,12 @@
                   <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
                 </div>
               </span>
-              <!-- <div v-show="dialogVisibleLiveVideo[scope.row.shelfName]" style="width: 50%; margin:auto; ">
+              <div v-show="dialogVisibleLiveVideo[scope.row.shelfName]" style="width: 50%; margin:auto; ">
                 <Camerapannel
-                  :data=scope.row.shelfName
+                  :shelfName=scope.row.shelfName
+                  :inventoryType="inventoryType"
                 />
-              </div> -->
+              </div>
             </template>
           </el-table-column>
           <el-table-column
@@ -166,6 +167,7 @@ export default {
   },
   data () {
     return {
+      inventoryType: 'Low',
       flvPlayer: null,
       paginationData: [],
       currPageTableData: [],
@@ -219,9 +221,6 @@ export default {
         }
       }
     },
-    deleteCamera (cameraname) {
-      console.log()
-    },
     handleLiveVideo (row) {
       let tmp = [...this.dialogVisibleLiveVideo]
       tmp[row.shelfName] = true
@@ -266,7 +265,6 @@ export default {
     beforeDelete (row) {
       console.log('details')
     },
-
     handleError (error) {
       this.dialogVisible = false
       if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {

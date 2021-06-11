@@ -34,10 +34,15 @@
 
 <script>
 import flvjs from 'flv.js'
+import { shelfApi } from '../tools/request.js'
 export default {
   name: 'Camerapannel',
   props: {
-    data: {
+    shelfName: {
+      type: String,
+      required: true
+    },
+    inventoryType: {
       type: String,
       required: true
     }
@@ -45,7 +50,6 @@ export default {
   data () {
     return {
       flvPlayer: null,
-      videoData: ''
     }
   },
   methods: {
@@ -53,15 +57,16 @@ export default {
       console.log('playvideo')
       if (flvjs.isSupported()) {
         console.log('vid id', this.vidId)
-        console.log('videoData', this.videoData)
         var videoElement = document.getElementById(this.vidId)
-        console.log('data -> ', this.data)
+        console.log('shelfName -> ', this.shelfName)
+        console.log('inventory type -> ', this.inventoryType)
         console.log('videoElement', videoElement)
         videoElement.crossOrigin = 'anonymous'
+        let videoUrl = shelfApi + '/video/' + this.shelfName
         this.flvPlayer = flvjs.createPlayer({
           type: 'mp4',
           isLive: true,
-          url: 'http://localhost:30995/v1/shelf/video/' + this.data
+          url: videoUrl
         }, {
           enableWorker: false,
           enableStashBuffer: false,
@@ -83,22 +88,12 @@ export default {
   },
   computed: {
     vidId: function () {
-      return this.data + 'videoElement'
+      return this.shelfName + this.inventoryType + 'videoElement'
     }
   },
   watch: {
-    data (val) {
-      console.log('in watch of image ', val)
-      this.data = val
-      this.videoData = val
-      console.log(this.data)
-      this.playVideo()
-    }
   },
   mounted () {
-    console.log('in image mounted', this.data)
-    this.videoData = this.data
-    console.log('in image mounted video data', this.videoData)
     this.playVideo()
   }
 }

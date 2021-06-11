@@ -21,6 +21,7 @@ let api = 'http://' + window.location.href.split('//')[1].split(':')[0]
 let backupApi = 'http://' + window.location.href.split('//')[1].split(':')[0]
 let roboApi = backupApi + ':30996' + '/v1/robo'
 let shelfApi = api + ':30995' + '/v1/shelf'
+let nodeProxyApi = api + ':30999/'
 
 axios.interceptors.response.use(
   function (response) {
@@ -112,5 +113,6 @@ export {
   PUT,
   DELETE,
   robo,
-  shelfApi
+  shelfApi,
+  nodeProxyApi
 }
