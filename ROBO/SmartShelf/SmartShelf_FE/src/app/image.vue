@@ -19,7 +19,7 @@
       <div
         class="video-player vjs-custom-skin"
       >
-        <video controls
+        <video
           muted
           loop
           :id="vidId"
