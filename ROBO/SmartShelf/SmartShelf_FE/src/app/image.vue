@@ -18,27 +18,14 @@
     <div class="video-cards">
       <div
         class="video-player vjs-custom-skin"
-        v-if="data.type.indexOf('mp4')>-1"
       >
-        <video
+        <video controls
           muted
           loop
           :id="vidId"
           width="100%"
           height="100%"
           crossOrigin="anonymous"
-          style="margin-bottom: 20px"
-        />
-      </div>
-      <div
-        class="video-player vjs-custom-skin"
-        v-if="data.type.indexOf('mp4')<0"
-      >
-        <video
-          muted
-          id="videoElement"
-          width="100%"
-          height="100%"
         />
       </div>
     </div>
@@ -50,74 +37,69 @@ import flvjs from 'flv.js'
 export default {
   name: 'Camerapannel',
   props: {
-    delcamera:
-    {
-      type: Function,
-      required: true
-    },
-    data:
-    {
-      type: Object,
+    data: {
+      type: String,
       required: true
     }
   },
   data () {
     return {
       flvPlayer: null,
-      videoSrc: 'data:video/mp4;base64,' + this.data.src
+      videoData: ''
     }
   },
   methods: {
-    // Before Delete camera
-    beforeDeleteCamera (name) {
-      this.$confirm('This will permanently delete the file. Continue?', 'Warning', {
-        confirmButtonText: 'OK',
-        cancelButtonText: 'Cancel',
-        type: 'Are you Sure'
-      }).then(() => {
-        this.delcamera(name)
-        this.$message({
-          type: 'success',
-          message: 'Delete completed'
+    playVideo() {
+      console.log('playvideo')
+      if (flvjs.isSupported()) {
+        console.log('vid id', this.vidId)
+        console.log('videoData', this.videoData)
+        var videoElement = document.getElementById(this.vidId)
+        console.log('data -> ', this.data)
+        console.log('videoElement', videoElement)
+        videoElement.crossOrigin = 'anonymous'
+        this.flvPlayer = flvjs.createPlayer({
+          type: 'mp4',
+          isLive: true,
+          url: 'http://localhost:30995/v1/shelf/video/' + this.data
+        }, {
+          enableWorker: false,
+          enableStashBuffer: false,
+          isLive: true,
+          lazyLoad: false,
+          stashInitialSize: 0,
+          autoCleanupSourceBuffer: true
         })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: 'Delete canceled'
-        })
-      })
+        this.flvPlayer.attachMediaElement(videoElement)
+        this.flvPlayer.load()
+        let playPromise = this.flvPlayer.play()
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.flvPlayer.play()
+          }).catch((e) => { console.log(e) })
+        }
+      }
     }
   },
   computed: {
     vidId: function () {
-      return this.data.name + 'videoElement'
+      return this.data + 'videoElement'
+    }
+  },
+  watch: {
+    data (val) {
+      console.log('in watch of image ', val)
+      this.data = val
+      this.videoData = val
+      console.log(this.data)
+      this.playVideo()
     }
   },
   mounted () {
-    if (flvjs.isSupported()) {
-      var videoElement = document.getElementById(this.vidId)
-      videoElement.crossOrigin = 'anonymous'
-      this.flvPlayer = flvjs.createPlayer({
-        type: 'mp4',
-        isLive: true,
-        url: this.data.src
-      }, {
-        enableWorker: false,
-        enableStashBuffer: false,
-        isLive: true,
-        lazyLoad: false,
-        stashInitialSize: 0,
-        autoCleanupSourceBuffer: true
-      })
-      this.flvPlayer.attachMediaElement(videoElement)
-      this.flvPlayer.load()
-      let playPromise = this.flvPlayer.play()
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          this.flvPlayer.play()
-        }).catch((e) => { console.log(e) })
-      }
-    }
+    console.log('in image mounted', this.data)
+    this.videoData = this.data
+    console.log('in image mounted video data', this.videoData)
+    this.playVideo()
   }
 }
 </script>
