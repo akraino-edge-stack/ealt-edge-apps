@@ -83,11 +83,11 @@
                   <span style="padding: 0">  {{ item.currentCount }} / {{ item.maxCount }} </span>
                 </div>
               </span>
-              <div v-show="dialogVisibleLiveVideo[scope.row.shelfName]" style="width: 50%; margin:auto; ">
+              <!-- <div v-show="dialogVisibleLiveVideo[scope.row.shelfName]" style="width: 50%; margin:auto; ">
                 <Camerapannel
                   :data=scope.row.shelfName
                 />
-              </div>
+              </div> -->
             </template>
           </el-table-column>
           <el-table-column
