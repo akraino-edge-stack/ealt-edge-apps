@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import { robo } from '../tools/request.js'
+import { robo, nodeProxyApi } from '../tools/request.js'
 import Search from '../components/Search2.vue'
 import io from 'socket.io-client'
 import AllEvents from './AllEvents.vue'
@@ -103,8 +103,7 @@ export default {
   },
   created () {
     // Client receives the message:
-    const baseUrl = 'http://' + window.location.href.split('//')[1].split(':')[0]
-    const socket = io.connect(baseUrl + ':30999/')
+    const socket = io.connect(nodeProxyApi)
     socket.on('notify', (data) => {
       this.getShelfNotificationListInPage()
       this.getShelfAlertNotificationListInPage()
