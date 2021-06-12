@@ -41,7 +41,7 @@
                     {{ $t('Add shelf') }}
                   </el-button>
                 </p>
-                <p
+                <!-- <p
                     class="btn-add"
                 >
                   <el-button
@@ -51,7 +51,7 @@
                   >
                     {{ $t('Upload video') }}
                   </el-button>
-                </p>
+                </p> -->
               </div>
             </el-col>
           </el-row>
@@ -105,19 +105,19 @@
                     :label="$t('Location')"
                     prop="location"
                   >
-                    <el-input
+                    <el-select
                       id="location"
                       v-model="currForm.location"
-                    />
-                  </el-form-item>
-                  <el-form-item
-                    :label="$t('Camera Url')"
-                    prop="rtspUrl"
-                  >
-                    <el-input
-                      id="rtspUrl"
-                      v-model="currForm.rtspUrl"
-                    />
+                      :placeholder="$t('location')"
+                      style="width:100%"
+                    >
+                      <el-option
+                        v-for="(item, i) in locationList"
+                        :key="i"
+                        :label="item"
+                        :value="item"
+                      />
+                    </el-select>
                   </el-form-item>
                   <el-form-item
                     v-for="(product,index) in currForm.productDetails"
@@ -234,6 +234,7 @@ export default {
   data () {
     return {
       productList: ['Bottle', 'ToyCar'],
+      locationList: [],
       shelfData: [],
       lowShelfData: [],
       activeName: 'All Inventory',
@@ -305,6 +306,7 @@ export default {
     addShelf () {
       this.title = this.$t('Add Shelf')
       this.resetForm()
+      this.getLocationList()
       this.getProductList()
       this.dialogVisible = true
     },
@@ -370,12 +372,18 @@ export default {
       robo.getProductList().then(response => {
         this.productList = response.data.ObjList
       }).catch((error) => {
-        this.dataLoading = false
-        if (error.response.status === 404 && error.response.data.details[0] === 'Record not found') {
-          this.productList = []
-        } else {
-          this.$message.error(this.$t('failed to product list'))
-        }
+        console.log(error)
+        this.productList = []
+        this.$message.error(this.$t('failed to product list'))
+      })
+    },
+    getLocationList () {
+      robo.getLocationList().then(response => {
+        this.locationList = response.data.Locations
+      }).catch((error) => {
+        console.log(error)
+        this.locationList = []
+        this.$message.error(this.$t('failed to location list'))
       })
     },
     confirm (form) {

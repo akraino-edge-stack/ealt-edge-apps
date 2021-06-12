@@ -35,12 +35,12 @@ export default new Router({
           path: '/robo/shelf-mgmt',
           name: 'Shelf Management',
           component: () => import('../app/Dashboard.vue')
-        },
-        {
-          path: '/robo/backup-restore',
-          name: 'Backup And Restore',
-          component: () => import('../app/Restore.vue')
         }
+        // {
+        //   path: '/robo/backup-restore',
+        //   name: 'Backup And Restore',
+        //   component: () => import('../app/Restore.vue')
+        // }
       ]
     }
   ]

@@ -90,6 +90,9 @@ let robo = {
   getProductList () {
     return GET(shelfApi + '/ObjList')
   },
+  getLocationList () {
+    return GET(shelfApi + '/locations')
+  },
   getShelfNotificationList () {
     return GET(shelfApi + '/messages')
   },

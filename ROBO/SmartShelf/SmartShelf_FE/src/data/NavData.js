@@ -15,21 +15,21 @@
  */
 
 const NavData = [
-  {
-    'id': '2.1',
-    'icon': '',
-    'name': 'Shelf Management',
-    'path': '/robo/shelf-mgmt',
-    'pageId': '2.0',
-    'display': false
-  },
-  {
-    'id': '2.6',
-    'name': 'Backup And Restore',
-    'path': '/robo/backup-restore',
-    'pageId': '2.1',
-    'display': false
-  }
+  // {
+  //   'id': '2.1',
+  //   'icon': '',
+  //   'name': 'Shelf Management',
+  //   'path': '/robo/shelf-mgmt',
+  //   'pageId': '2.0',
+  //   'display': false
+  // },
+  // {
+  //   'id': '2.6',
+  //   'name': 'Backup And Restore',
+  //   'path': '/robo/backup-restore',
+  //   'pageId': '2.1',
+  //   'display': false
+  // }
 ]
 
 export default NavData
