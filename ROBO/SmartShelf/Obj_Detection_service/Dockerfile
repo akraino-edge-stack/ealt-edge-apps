@@ -30,6 +30,7 @@ RUN mkdir -p /usr/app/resources
 RUN mkdir -p /usr/app/images
 RUN mkdir -p /usr/app/images/input
 RUN mkdir -p /usr/app/images/result
+RUN mkdir -p /usr/app/model
 
 # Set the home directory to our app user's home.
 ENV APP_HOME=/usr/app
@@ -78,6 +79,7 @@ RUN pip install -r requirements.txt
 
 COPY detection $APP_HOME/detection/
 # COPY resources $APP_HOME/resources/
+COPY model_info $APP_HOME/model/
 
 COPY configs/*.sh $APP_HOME/bin
 

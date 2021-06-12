@@ -81,6 +81,7 @@ COPY config.py run.py $APP_HOME/
 COPY inventry $APP_HOME/inventry/
 
 COPY configs/start.sh $APP_HOME/bin
+COPY Input_Data $APP_HOME/test/resources/
 
 RUN chmod 750 $APP_HOME &&\
     chmod -R 550 $APP_HOME/bin &&\

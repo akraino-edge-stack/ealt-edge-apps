@@ -52,12 +52,21 @@ listOfVideos = []
 listOfShelfTables = []
 listOfProducts = []
 TableIndex = 0
-listOfObj = ['Bottle', 'ToyCar', 'ToyTrain', 'ToyBus']
+listOfObj = ['Bottle', 'ToyCar', 'Chair', 'TvMonitor', 'Table', 'Sofa']
 lastObj1Cnt = 0
 lastObj2Cnt = 0
 firstFrame = 1
 listOfTableIndex = {}
 listOfObjStatus = {}
+
+listOfLocation = ['Aisle_01', 'Aisle_02', 'Aisle_03', 'Aisle_04', 'Aisle_05',
+                  'Aisle_06', 'Aisle_07', 'Aisle_08', 'Aisle_09', 'Aisle_10']
+
+DictofCamera = {'Aisle_01': "cam01.mp4", 'Aisle_02': "cam01.mp4",
+                'Aisle_03': "cam01.mp4", 'Aisle_04': "cam01.mp4",
+                'Aisle_05': "cam01.mp4",  'Aisle_06': "cam01.mp4",
+                'Aisle_07': "cam01.mp4", 'Aisle_08': "cam01.mp4",
+                'Aisle_09': "cam01.mp4", 'Aisle_10': "cam01.mp4"}
 
 DictDetectionStatus = {}
 HTTP_URL = "http://"
@@ -124,7 +133,7 @@ def video(video_capture, shelf_info, TableIndex):
         if not success:
             video_capture.reset_frame()
             count = count + 1
-            time.sleep(.4)
+            #time.sleep(.3)
             continue
 
         if DictDetectionStatus[key] == 0 :
@@ -143,7 +152,7 @@ def video(video_capture, shelf_info, TableIndex):
 
         # _, _ = cv2.imencode('.jpg', frame)
         #time.sleep(.01)
-        time.sleep(.017)
+        time.sleep(.015)
     return 'SampleString'
 
 
@@ -190,10 +199,14 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
             objType = 'Bottle'
         elif objType == "car" :
             objType = 'ToyCar'
-        elif objType == "train" :
-            objType = 'ToyTrain'
-        elif objType == "bus" :
-            objType = 'ToyBus'
+        elif objType == "chair" :
+            objType = 'Chair'
+        elif objType == "tvmonitor" :
+            objType = 'TvMonitor'
+        elif objType == "diningtable" :
+            objType = 'Table'
+        elif objType == "sofa" :
+            objType = 'Sofa'
 
         if productCnt == 1:
 
@@ -816,6 +829,7 @@ def add_shelf():
     for shelf in listOfShelf :
         if ((shelf['shelfName'] == shelf_details['shelfName'])
             and (shelf['location'] == shelf_details['location'])) :
+            app.logger.info('[Add shelf]shelf alredy exist')
             msg = {"responce": "failure"}
             return jsonify(msg)
 
@@ -869,8 +883,6 @@ def add_shelf():
                             ]
     }
 
-    listOfShelf.append(shelf_info)
-
     global TableIndex
     print ('print index for shelf', TableIndex)
 
@@ -890,22 +902,28 @@ def add_shelf():
                               'lastObj2Cnt' : 0,
                               'FirstFrame': 1}
 
-    if "mp4" in shelf_details["rtspUrl"]:
-        video_file = VideoFile(shelf_details['rtspUrl'])
-        # video_dict = {camera_info["name"]: video_file}
-        # listOfVideos.append(video_dict)
-        thread_2 = threading.Thread(target=video,
-                                    args=(video_file,
-                                          shelf_info,TableIndex,))
-        thread_2.start()
-        thread_2.join(1)
-
-        TableIndex = TableIndex + 1
-        print ('thread is over')
-        msg = {"responce": "success"}
+    Loc = shelf_details['location']
+    if Loc in DictofCamera :
+       Video = DictofCamera[Loc]
+    else :
+        app.logger.info('[Add shelf]location is wrong')
+        msg = {"responce": "failure"}
         return jsonify(msg)
 
-    msg = {"responce": "failure"}
+    listOfShelf.append(shelf_info)
+
+    video_file = VideoFile(Video)
+    # video_dict = {camera_info["name"]: video_file}
+    # listOfVideos.append(video_dict)
+    thread_2 = threading.Thread(target=video,
+                                args=(video_file,
+                                      shelf_info, TableIndex,))
+    thread_2.start()
+    thread_2.join(1)
+
+    TableIndex = TableIndex + 1
+    print('thread is over')
+    msg = {"responce": "success"}
     return jsonify(msg)
 
 
@@ -918,7 +936,15 @@ def play_video(shelfname):
     print('Shelf name is =' + shelfname)
     for ShelfInfo in listOfShelf:
         if shelfname == ShelfInfo['shelfName']:
-            videoPath = app.config['VIDEO_PATH'] + ShelfInfo['rtspUrl']
+            Loc = ShelfInfo['location']
+            if Loc in DictofCamera:
+                Video = DictofCamera[Loc]
+            else:
+                app.logger.info('[Add shelf]location is wrong')
+                msg = {"responce": "failure"}
+                return jsonify(msg)
+
+            videoPath = app.config['VIDEO_PATH'] + Video
             return Response(FileWrapper(open(videoPath, 'rb')),
                             mimetype='video/mp4')
 
@@ -929,9 +955,6 @@ def delete_shelf(shelfname, location):
     app.logger.info("Received message from ClientIP [" + request.remote_addr
                     + "] Operation [" + request.method + "]" +
                     " Resource [" + request.url + "]")
-    #productCnt = len(shelf_details['productDetails'])
-    # print('total products are=',productCnt)
-    global TableIndex
 
     for i in range(len(listOfShelf)) :
         if ((listOfShelf[i]['shelfName'] == shelfname)
@@ -943,21 +966,12 @@ def delete_shelf(shelfname, location):
             print("[DETECTION]Detection status:")
             print(DictDetectionStatus)
 
-            '''
-            Tableindex = listOfTableIndex[key]
-            print("[Delete]Global Table index is:", Tableindex)
-
-            print("[Delete]list of shelf table before:", listOfShelfTables)
-
-            listOfShelfTables.pop(Tableindex)
-            TableIndex = TableIndex - 1
-            print("[Delete]list of shelf table after:", listOfShelfTables)
-            '''
             break
 
     if shelfname in listOfObjStatus :
         del listOfObjStatus[shelfname]
 
+    print ('[Delete]Alerts msg list', listOfAlertsMsgs)
     j = 0
     while j < 2 :
         j = j+1
@@ -973,6 +987,7 @@ def delete_shelf(shelfname, location):
 
     url = FRONTEND_URL + "/notify"
     requests.post(url, json=newdict)
+
     for i in range(len(listOfShelfTables)) :
         if listOfShelfTables[i]['shelfName'] == shelfname :
             #listOfShelfTables.insert(i, shelfTable)
@@ -998,6 +1013,15 @@ def shelf_table():
     table = {"shelfDetails": listOfShelfTables}
     return jsonify(table)
 
+
+@app.route('/v1/shelf/locations', methods=['GET'])
+def get_locations():
+    app.logger.info("Received message from ClientIP [" + request.remote_addr
+                    + "] Operation [" + request.method + "]" +
+                    " Resource [" + request.url + "]")
+
+    locations = {"Locations": listOfLocation}
+    return jsonify(locations)
 
 # TODO: scan table and display low entries
 @app.route('/v1/shelf/table/empty', methods=['GET'])
