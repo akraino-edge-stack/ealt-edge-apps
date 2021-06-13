@@ -117,6 +117,45 @@ class VideoFile(object):
     def reset_frame(self):
         self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
+## To get video sync in local env.
+# def video(video_capture, shelf_info, TableIndex):
+#
+#     app.logger.info("local video")
+#     process_this_frame = 0
+#     count = 0
+#     key = shelf_info['shelfName'] + shelf_info['location']
+#     print('[video]Deletion key is', key)
+#     time.sleep(1.1)
+#
+#     while True:
+#         success, frame = video_capture.get_frame()
+#         if count == 5:
+#             break
+#         if not success:
+#             video_capture.reset_frame()
+#             count = count + 1
+#             #time.sleep(.3)
+#             continue
+#
+#         if DictDetectionStatus[key] == 0 :
+#             print('[video]Deletion is triggered')
+#             return
+#
+#         if process_this_frame == 0:
+#             thread_1 = threading.Thread(target=shelf_inventory, args=(frame, shelf_info,TableIndex))
+#             thread_1.start()
+#             thread_1.join(1)
+#
+#         count = 0
+#         process_this_frame = process_this_frame + 1
+#         if process_this_frame == 10:
+#             process_this_frame = 0
+#
+#         # _, _ = cv2.imencode('.jpg', frame)
+#         #time.sleep(.01)
+#         time.sleep(.015)
+#     return 'SampleString'
+
 
 def video(video_capture, shelf_info, TableIndex):
 
@@ -126,14 +165,15 @@ def video(video_capture, shelf_info, TableIndex):
     key = shelf_info['shelfName'] + shelf_info['location']
     print('[video]Deletion key is', key)
     time.sleep(1.1)
-
+    reset = 0
     while True:
         success, frame = video_capture.get_frame()
-        if count == 5:
-            break
+        #if count == 5:
+            #break
         if not success:
             video_capture.reset_frame()
-            count = count + 1
+            reset = 1
+            #count = count + 1
             #time.sleep(.3)
             continue
 
@@ -146,14 +186,18 @@ def video(video_capture, shelf_info, TableIndex):
             thread_1.start()
             thread_1.join(1)
 
-        count = 0
+        #count = 0
         process_this_frame = process_this_frame + 1
         if process_this_frame == 10:
             process_this_frame = 0
 
         # _, _ = cv2.imencode('.jpg', frame)
         #time.sleep(.01)
-        time.sleep(.015)
+        #time.sleep(.015)
+        if reset == 0:
+            time.sleep(0.021)
+        reset = 0
+
     return 'SampleString'
 
 
