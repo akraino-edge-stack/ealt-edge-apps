@@ -154,12 +154,11 @@ def Detection(img):
     bottelCount = 0
     carCount = 0
     personCount = 0
-    chairCount = 0
-    tvmonitorCount = 0
-    diningtableCount = 0
-    sofaCount = 0
+    trainCount = 0
+    busCount = 0
     birdCount = 0
     otherCount = 0
+    tvmonitorCount = 0
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]  # Confidence of prediction
         if confidence > ConfPercent:  # Filter prediction
@@ -201,14 +200,12 @@ def Detection(img):
                     carCount = carCount + 1
                 elif ('person' in label):
                     personCount = personCount + 1
-                elif ('chair' in label):
-                    chairCount = chairCount + 1
+                elif ('train' in label):
+                    trainCount = trainCount + 1
+                elif ('bus' in label):
+                    busCount = busCount + 1
                 elif ('tvmonitor' in label):
                     tvmonitorCount = tvmonitorCount + 1
-                elif ('diningtable' in label):
-                    diningtableCount = diningtableCount + 1
-                elif ('sofa' in label):
-                    sofaCount = sofaCount + 1
                 elif ('bird' in label):
                     birdCount = birdCount + 1
                 else:
@@ -219,10 +216,8 @@ def Detection(img):
     print("total item count", count)
     print("bottle item count", bottelCount)
     print("car item count", carCount)
-    print("chair item count", chairCount)
-    print("tvmonitor item count", tvmonitorCount)
-    print("diningTble item count", diningtableCount)
-    print("sofa item count", sofaCount)
+    print("train item count", trainCount)
+    print("bus item count", busCount)
     print("other item count", otherCount)
 
     if (bottelCount != 0):
@@ -246,10 +241,17 @@ def Detection(img):
         }
         listOfMsgs.append(objdict)
 
-    if (chairCount != 0):
+    if (trainCount != 0):
         objdict = {
-            'objtype': 'chair',
-            'objcount': chairCount
+            'objtype': 'train',
+            'objcount': trainCount
+        }
+        listOfMsgs.append(objdict)
+
+    if (busCount != 0):
+        objdict = {
+            'objtype': 'bus',
+            'objcount': busCount
         }
         listOfMsgs.append(objdict)
 
@@ -257,20 +259,6 @@ def Detection(img):
         objdict = {
             'objtype': 'tvmonitor',
             'objcount': tvmonitorCount
-        }
-        listOfMsgs.append(objdict)
-
-    if (diningtableCount != 0):
-        objdict = {
-            'objtype': 'diningtable',
-            'objcount': diningtableCount
-        }
-        listOfMsgs.append(objdict)
-
-    if (sofaCount != 0):
-        objdict = {
-            'objtype': 'sofa',
-            'objcount': sofaCount
         }
         listOfMsgs.append(objdict)
 

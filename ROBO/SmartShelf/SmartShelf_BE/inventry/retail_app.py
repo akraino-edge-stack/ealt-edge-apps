@@ -52,7 +52,8 @@ listOfVideos = []
 listOfShelfTables = []
 listOfProducts = []
 TableIndex = 0
-listOfObj = ['Bottle', 'ToyCar', 'Chair', 'TvMonitor', 'Table', 'Sofa']
+listOfObj = ['Bottle', 'ToyCar', 'ToyTrain', 'ToyBus', 'Bread', 'TvMonitor',
+             'PottedPlant']
 lastObj1Cnt = 0
 lastObj2Cnt = 0
 firstFrame = 1
@@ -199,14 +200,12 @@ def parse_obj_data(data, shelf_info, TableIndex, shelf_name):
             objType = 'Bottle'
         elif objType == "car" :
             objType = 'ToyCar'
-        elif objType == "chair" :
-            objType = 'Chair'
+        elif objType == "train" :
+            objType = 'ToyTrain'
+        elif objType == "bus" :
+            objType = 'ToyBus'
         elif objType == "tvmonitor" :
             objType = 'TvMonitor'
-        elif objType == "diningtable" :
-            objType = 'Table'
-        elif objType == "sofa" :
-            objType = 'Sofa'
 
         if productCnt == 1:
 
