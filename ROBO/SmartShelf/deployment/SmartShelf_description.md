@@ -29,3 +29,8 @@ Currently available in-retail enterprise solutions, wherein in store deployment 
 This application is developed as part of Akraino EALTEdge BP using EdgeGallery as an upstream project. Kindly refer
  below link to get more insights about this application:
 https://wiki.akraino.org/display/AK/EALT-EDGE+Landing+Application
+
+
+Applications URL:
+--------------------------------
+http://IP:30997

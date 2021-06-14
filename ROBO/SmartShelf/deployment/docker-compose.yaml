@@ -13,14 +13,12 @@ services:
             - "9998:9998"
         container_name: obj-detection
         hostname: obj-detection
-        volumes: 
-            - /usr/app/model:/usr/app/model
 
     node-proxy:
         network_mode: bridge
         image: ealtedge/robo-node-proxy:v1.0
         ports: 
-            - "5000:5000"
+            - "30999:5000"
         container_name: node-proxy
         hostname: node-proxy
 
@@ -42,7 +40,7 @@ services:
         network_mode: bridge
         image: ealtedge/robo-fe:v1.0
         ports: 
-            - "8080:8080"
+            - "30997:8080"
         container_name: robo-fe
         hostname: robo-fe
         depends_on: 
